@@ -1,0 +1,7 @@
+{
+  "name": "baitlas-renderer", "private": true, "type": "module", "version": "0.1.0",
+  "scripts": {"build": "node build.js", "test": "playwright test", "serve": "python3 -m http.server 8000 --directory .."},
+  "engines": {"node": ">=20"},
+  "dependencies": {"leaflet": "1.9.4"},
+  "devDependencies": {"esbuild": "0.25.12", "@playwright/test": "1.56.1"}
+}

@@ -1,47 +1,28 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Baitlas" />
-    <title>Baitlas</title>
-    <style>
-      :root {
-        color-scheme: light dark;
-        font-family:
-          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
-          "Segoe UI", sans-serif;
-      }
-
-      * {
-        box-sizing: border-box;
-      }
-
-      body {
-        display: grid;
-        min-height: 100vh;
-        margin: 0;
-        place-items: center;
-        background: #0b1020;
-        color: #f8fafc;
-      }
-
-      h1 {
-        margin: 0;
-        font-size: clamp(3rem, 10vw, 7rem);
-        letter-spacing: -0.06em;
-      }
-
-      p {
-        margin: 1rem 0 0;
-        text-align: center;
-      }
-    </style>
-  </head>
-  <body>
-    <main>
-      <h1>Hello, world!</h1>
-      <p>Repo moved.</p>
-    </main>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#f6f4ec" />
+  <meta name="description" content="Baitlas — stories grounded in place. Explore the Lewis and Clark Expedition through maps, a timeline, and field notes." />
+  <title>Lewis & Clark Expedition · Baitlas</title>
+  <link rel="stylesheet" href="./generated/renderer/app.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to expedition</a>
+  <header class="site-header">
+    <a class="brand" href="./" aria-label="Baitlas home"><span class="brand-mark" aria-hidden="true">◈</span> baitlas<span class="brand-dot">.</span></a>
+    <nav aria-label="Main navigation">
+      <button class="nav-link active" data-mode="Read" aria-pressed="true">Read</button>
+      <button class="nav-link" data-mode="Hike" aria-pressed="false">Hike</button>
+      <button class="nav-link" id="about-button">About</button>
+    </nav>
+    <div class="catalog-wrap"><button id="catalog-button" class="catalog-button" aria-expanded="false" aria-controls="catalog">Explore stories <span aria-hidden="true">↗</span></button><div id="catalog" class="catalog" hidden></div></div>
+  </header>
+  <main id="main" tabindex="-1"><p class="loading" role="status">Unfolding the map…</p></main>
+  <footer class="site-footer"><span>BAITLAS <span class="footer-divider">/</span> Stories grounded in place.</span><span>An atlas for the curious.</span></footer>
+  <dialog id="about-dialog"><button class="close-button" id="about-close" aria-label="Close about">×</button><p class="eyebrow">ABOUT BAITLAS</p><h2>Every story has a place.</h2><p>Baitlas brings maps, timelines, and field notes together. Follow a journey, open a place, and explore the sources behind the story.</p><p>This first edition follows Lewis and Clark. Read and Hike share the same story view. The sample map is historical interpretation and does not provide hiking directions.</p><button class="primary-button" id="about-done">Back to the atlas</button></dialog>
+  <script type="module" src="./generated/renderer/app.js"></script>
+  <noscript><p>Please enable JavaScript to explore the interactive map.</p></noscript>
+</body>
 </html>

@@ -1,0 +1,10 @@
+id,title,latitude,longitude,card,kind,location_note,source
+camp-dubois,Camp Dubois,38.802,-90.1,camp-dubois,Departure,Near the historic departure area; approximate.,https://www.nps.gov/articles/departure-day.htm
+floyd,Sergeant Floyd,42.453,-96.408,floyd,Up the Missouri,Modern monument area; approximate historical location.,https://www.nps.gov/mnrr/learn/historyculture/the-lewis-and-clark-expedition.htm
+fort-mandan,Fort Mandan,47.29,-101.47,fort-mandan,Winter camp,"Approximate historic area, not the modern replica. The original fort location is uncertain.",https://home.nps.gov/places/fort-mandan.htm
+great-falls,Great Falls,47.57,-111.12,great-falls,Portage,General Great Falls area; the portage extended well beyond this marker.,https://home.nps.gov/places/great-falls-portage-mt.htm
+lemhi-pass,Lemhi Pass,44.974,-113.445,lemhi-pass,Mountain crossing,Approximate pass location.,https://www.nps.gov/subjects/travellewisandclark/expedition-by-date.htm
+weippe,Weippe Prairie,46.35,-115.92,weippe,Encounter,"General prairie location, not an exact village site.",https://www.nps.gov/nepe/learn/historyculture/weippe-prairie-history.htm
+chinook-point,Chinook Point,46.251,-123.919,chinook-point,Pacific coast,Approximate viewpoint near Chinook Point.,https://www.nps.gov/subjects/travellewisandclark/expedition-by-date.htm
+fort-clatsop,Fort Clatsop,46.134,-123.88,fort-clatsop,Winter camp,Modern reconstructed fort near the historical site.,https://www.nps.gov/places/fort-clatsop-or.htm
+st-louis,St. Louis,38.625,-90.185,st-louis,Return,Approximate riverfront arrival area.,https://www.nps.gov/mnrr/learn/historyculture/the-lewis-and-clark-expedition.htm

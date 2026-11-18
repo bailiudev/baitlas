@@ -1,0 +1,39 @@
+{
+  "type": "Feature",
+  "properties": {
+    "id": "mountain-crossing",
+    "kind": "region",
+    "title": "Mountain crossing context",
+    "color": "#8a9472",
+    "approximate": true,
+    "description": "Editorial focus area only. This shape does not represent a tribal territory, political boundary, or measured historical extent.",
+    "source": "https://www.nps.gov/mnrr/learn/historyculture/the-lewis-and-clark-expedition.htm"
+  },
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [
+          -115.9,
+          44.8
+        ],
+        [
+          -112.9,
+          44.8
+        ],
+        [
+          -113.3,
+          47.2
+        ],
+        [
+          -116.1,
+          47.2
+        ],
+        [
+          -115.9,
+          44.8
+        ]
+      ]
+    ]
+  }
+}

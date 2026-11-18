@@ -1,0 +1,110 @@
+{
+  "type": "Feature",
+  "properties": {
+    "id": "pacific",
+    "kind": "route",
+    "title": "Across to the Pacific",
+    "color": "#3e7776",
+    "period": "1805",
+    "approximate": true,
+    "description": "Schematic outbound route connecting selected geographic anchors; not a survey or hiking trail. The 1806 return branches are not drawn.",
+    "source": "https://www.nps.gov/mnrr/learn/historyculture/the-lewis-and-clark-expedition.htm"
+  },
+  "geometry": {
+    "type": "LineString",
+    "coordinates": [
+      [
+        -113.445,
+        44.974
+      ],
+      [
+        -113.9,
+        45.17
+      ],
+      [
+        -113.97,
+        45.7
+      ],
+      [
+        -114.1,
+        46.15
+      ],
+      [
+        -114.08,
+        46.76
+      ],
+      [
+        -114.58,
+        46.63
+      ],
+      [
+        -115.0,
+        46.5
+      ],
+      [
+        -115.5,
+        46.55
+      ],
+      [
+        -115.92,
+        46.35
+      ],
+      [
+        -116.25,
+        46.5
+      ],
+      [
+        -116.6,
+        46.47
+      ],
+      [
+        -117.03,
+        46.42
+      ],
+      [
+        -117.8,
+        46.6
+      ],
+      [
+        -118.5,
+        46.6
+      ],
+      [
+        -119.05,
+        46.25
+      ],
+      [
+        -119.5,
+        45.95
+      ],
+      [
+        -120.7,
+        45.72
+      ],
+      [
+        -121.5,
+        45.7
+      ],
+      [
+        -122.75,
+        45.65
+      ],
+      [
+        -122.88,
+        46.1
+      ],
+      [
+        -123.4,
+        46.15
+      ],
+      [
+        -123.919,
+        46.251
+      ],
+      [
+        -123.88,
+        46.134
+      ]
+    ]
+  }
+}

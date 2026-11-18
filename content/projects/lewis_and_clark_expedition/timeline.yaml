@@ -1,0 +1,78 @@
+# Dates use YYYY-MM-DD. Marker IDs link each event to the map.
+events:
+  - id: camp-dubois
+    date: 1804-05-14
+    title: The journey begins
+    marker: camp-dubois
+    summary: Clark leads the party away from Camp Dubois and onto the Missouri. Lewis joins them later
+      at St. Charles.
+    source: https://www.nps.gov/articles/departure-day.htm
+  - id: floyd
+    date: 1804-08-20
+    title: A loss on the Missouri
+    marker: floyd
+    summary: Sergeant Charles Floyd dies near present-day Sioux City. He is the only expedition member
+      to die during the journey.
+    source: https://www.nps.gov/mnrr/learn/historyculture/the-lewis-and-clark-expedition.htm
+  - id: fort-mandan
+    date: 1804-11-02
+    title: Winter in Mandan country
+    marker: fort-mandan
+    summary: The party selects its winter quarters near Mandan and Hidatsa communities. Sacagawea and
+      Toussaint Charbonneau join the expedition here.
+    source: https://home.nps.gov/places/fort-mandan.htm
+  - id: leave-mandan
+    date: 1805-04-07
+    title: West from Fort Mandan
+    marker: fort-mandan
+    summary: The keelboat heads downriver with records and specimens. The westbound party continues up
+      the Missouri.
+    source: https://home.nps.gov/places/fort-mandan.htm
+  - id: great-falls
+    date: 1805-06-13
+    title: The river becomes an obstacle
+    marker: great-falls
+    summary: Lewis reaches the Great Falls of the Missouri. The sequence of falls forces the party to
+      carry boats and supplies overland.
+    source: https://home.nps.gov/places/great-falls-portage-mt.htm
+  - id: lemhi-pass
+    date: 1805-08-12
+    title: Across the Continental Divide
+    marker: lemhi-pass
+    summary: Lewis reaches Lemhi Pass. Mountain ranges beyond the divide challenge the hope of an easy
+      water connection to the Pacific.
+    source: https://www.nps.gov/subjects/travellewisandclark/expedition-by-date.htm
+  - id: weippe
+    date: 1805-09-20
+    title: Meeting the Nez Perce
+    marker: weippe
+    summary: Clark’s advance party emerges from the Bitterroot Mountains at Weippe Prairie. Nez Perce
+      hosts provide food and knowledge of the country.
+    source: https://www.nps.gov/nepe/learn/historyculture/lewis-and-clark-journal-entries-weippe-prairie.htm
+  - id: chinook-point
+    date: 1805-11-15
+    title: At the Pacific
+    marker: chinook-point
+    summary: The party sees the Pacific near Chinook Point. Earlier, on November 7, Clark had mistaken
+      the broad Columbia estuary for the ocean.
+    source: https://www.nps.gov/subjects/travellewisandclark/expedition-by-date.htm
+  - id: fort-clatsop
+    date: 1805-12-25
+    title: A winter on the coast
+    marker: fort-clatsop
+    summary: The party moves into Fort Clatsop during December. A wet coastal winter is spent preparing
+      supplies, journals, and maps for the return.
+    source: https://irma.nps.gov/DataStore/FileSource/Get/2290174?filename=Fort+Clatsop+CLI_FINAL_05_20_2019.pdf
+  - id: leave-clatsop
+    date: 1806-03-23
+    title: The return begins
+    marker: fort-clatsop
+    summary: The expedition leaves its coastal winter quarters and begins the journey east.
+    source: https://www.nps.gov/places/fort-clatsop-or.htm
+  - id: st-louis
+    date: 1806-09-23
+    title: Home to St. Louis
+    marker: st-louis
+    summary: The Corps returns to St. Louis after crossing the continent and back. Its journals and maps
+      record the journey and the people encountered.
+    source: https://www.nps.gov/mnrr/learn/historyculture/the-lewis-and-clark-expedition.htm

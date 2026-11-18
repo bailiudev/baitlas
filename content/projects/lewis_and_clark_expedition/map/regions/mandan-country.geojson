@@ -1,0 +1,39 @@
+{
+  "type": "Feature",
+  "properties": {
+    "id": "mandan-country",
+    "kind": "region",
+    "title": "Mandan winter context",
+    "color": "#bd8a3d",
+    "approximate": true,
+    "description": "Editorial focus area only. This shape does not represent a tribal territory, political boundary, or measured historical extent.",
+    "source": "https://www.nps.gov/mnrr/learn/historyculture/the-lewis-and-clark-expedition.htm"
+  },
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [
+          -102.3,
+          46.9
+        ],
+        [
+          -100.8,
+          46.9
+        ],
+        [
+          -100.8,
+          47.7
+        ],
+        [
+          -102.3,
+          47.7
+        ],
+        [
+          -102.3,
+          46.9
+        ]
+      ]
+    ]
+  }
+}
