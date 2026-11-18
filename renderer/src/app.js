@@ -1,46 +1,37 @@
 import './styles.css';
 import {fetchData,loadProject,escapeHTML as h} from './project-loader.js';
 import {renderProject} from './project-view.js';
+import {renderHome,renderCollection,renderAbout,inCollection,projectURL} from './pages-view.js';
 const main=document.querySelector('#main');
-let activeView,mode='Read',catalog=[],loadNumber=0;
-async function openProject(id,event) {
-  const attempt=++loadNumber;
-  activeView?.destroy();activeView=null;
-  main.innerHTML='<p class="loading" role="status">Unfolding the map…</p>';
-  try {
-    if(!catalog.some(p=>p.id===id))throw new Error('This story was not found. Choose a story from Explore stories.');
-    const data=await loadProject(id);if(attempt!==loadNumber)return;
-    activeView=renderProject(main,data,mode,event);
-    if(!event)history.replaceState(null,'',`#${id}`);
-    document.title=`${data.project.title} · Baitlas`;
-  } catch(error) {
-    if(attempt!==loadNumber)return;
-    main.innerHTML=`<section class="error-state" role="alert"><p class="eyebrow">THE MAP COULD NOT OPEN</p><h1>Let’s find our way back.</h1><p>${h(error.message)}</p><p>Serve the repository over HTTP and run both build commands in the README.</p><button id="retry-load" class="primary-button">Try again</button></section>`;
-    document.querySelector('#retry-load').onclick=()=>openProject(catalog[0]?.id);
-  }
+const page=document.body.dataset.page||'home';
+const projectId=new URLSearchParams(location.search).get('project');
+document.querySelector('.skip-link').href=`${location.pathname}${location.search}#main`;
+for(const link of document.querySelectorAll('[data-page-link]')) {
+  if(link.dataset.pageLink===page){link.classList.add('active');link.setAttribute('aria-current','page');}
 }
-const catalogButton=document.querySelector('#catalog-button'),catalogPanel=document.querySelector('#catalog');
-function closeCatalog(){catalogPanel.hidden=true;catalogButton.setAttribute('aria-expanded','false');}
-catalogButton.onclick=()=>{catalogPanel.hidden=!catalogPanel.hidden;catalogButton.setAttribute('aria-expanded',String(!catalogPanel.hidden));};
-document.addEventListener('click',e=>{if(!e.target.closest('.catalog-wrap'))closeCatalog();});
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeCatalog();});
-document.querySelectorAll('[data-mode]').forEach(button=>button.onclick=()=>{
-  mode=button.dataset.mode;
-  document.querySelectorAll('[data-mode]').forEach(b=>{b.classList.toggle('active',b===button);b.setAttribute('aria-pressed',String(b===button));});
-  activeView?.setMode(mode);
-});
-const about=document.querySelector('#about-dialog');
-document.querySelector('#about-button').onclick=()=>about.showModal();
-for(const id of ['about-close','about-done'])document.getElementById(id).onclick=()=>about.close();
-about.addEventListener('click',e=>{if(e.target===about){const r=about.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)about.close();}});
 try {
-  if(location.protocol==='file:')throw new Error('This interactive atlas needs a local web server. Run: python3 -m http.server 8000, then open http://localhost:8000.');
-  catalog=await fetchData('generated/projects.json');
-  if(!catalog.length)throw new Error('No projects have been built yet.');
-  catalogPanel.innerHTML=`<p class="eyebrow">YOUR ATLAS</p>${catalog.map(p=>`<button data-project="${h(p.id)}"><strong>${h(p.title)}</strong><span>${h(p.period)} · ${h(p.category)} ↗</span></button>`).join('')}`;
-  catalogPanel.onclick=e=>{const b=e.target.closest('[data-project]');if(b){closeCatalog();history.replaceState(null,'',`#${b.dataset.project}`);openProject(b.dataset.project);}};
-  const rawHash=location.hash.slice(1);
-  const [id,event]=['main','map-notes'].includes(rawHash)?[]:rawHash.split('/');
-  await openProject(id||catalog[0].id,event);
-  window.addEventListener('hashchange',()=>{const hash=location.hash.slice(1);if(['main','map-notes'].includes(hash))return;const [next,event]=hash.split('/');openProject(next||catalog[0].id,event);});
-} catch(error){main.innerHTML=`<section class="error-state" role="alert"><h1>The atlas needs one more step.</h1><p>${h(error.message)}</p><p>See README.md for build and serving instructions.</p></section>`;}
+  if(location.protocol==='file:')throw new Error('Serve this atlas over HTTP: python3 -m http.server 8000, then open http://localhost:8000.');
+  if(page==='about') {
+    renderAbout(main);document.title='About · Baitlas';
+  } else {
+    const catalog=await fetchData('generated/projects.json');
+    // Keep links shared by the first MVP working.
+    const [legacyId,legacyEvent]=location.hash.slice(1).split('/');
+    if(page==='home'&&catalog.some(p=>p.id===legacyId)) {
+      const url=new URL(projectURL(legacyId),document.baseURI);
+      if(legacyEvent)url.hash=`event=${encodeURIComponent(legacyEvent)}`;
+      location.replace(url.href);
+    } else if((page==='read'||page==='hike')&&projectId) {
+      if(!catalog.some(p=>p.id===projectId&&inCollection(p,page)))throw new Error('This article could not be found in this collection.');
+      const data=await loadProject(projectId);
+      const event=location.hash.startsWith('#event=')?decodeURIComponent(location.hash.slice(7)):undefined;
+      renderProject(main,data,page,event);
+      document.title=`${data.project.title} · ${page==='hike'?'Hike':'Read'} · Baitlas`;
+      if(location.hash==='#map-notes'||location.hash.startsWith('#section-')||location.hash.startsWith('#reference-'))document.getElementById(location.hash.slice(1))?.scrollIntoView();
+    } else if(page==='read'||page==='hike') {
+      renderCollection(main,catalog,page);document.title=`${page==='read'?'Read':'Hike'} · Baitlas`;
+    } else renderHome(main,catalog);
+  }
+} catch(error) {
+  main.innerHTML=`<section class="error-state" role="alert"><p class="eyebrow">A SMALL DETOUR</p><h1>Let’s find our way back.</h1><p>${h(error.message)}</p><a class="underlined-link" href="${page==='hike'?'hike/':'read/'}">Back to the collection ↗</a></section>`;
+}

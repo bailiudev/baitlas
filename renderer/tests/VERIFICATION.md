@@ -1,21 +1,24 @@
-# MVP verification — 2026-11-17
+# Page refinement verification — 2026-11-17
 
 ## Executed
 
-- Materializer build: 11 chronological events, 15 map features (9 markers, 3 routes, 3 regions), 9 sanitized cards, notes, project catalog.
-- Seven Node content tests passed: valid sample; broken marker reference; impossible date; invalid/empty coordinates; missing cards/open region rings; CSV quoting/Markdown sanitization; basemap layers and photograph.
-- Renderer production bundle built successfully with locally bundled Leaflet.
-- Interactive checks in the Codex in-app browser at desktop (1440 × 1000) and mobile (390 × 844) sizes: map rendering; timeline/card selection; previous/next; marker selection; full-extent reset; layer checkboxes; Read/Hike; About; project catalog; notes navigation; deep-link loading; missing-project recovery; keyboard event activation; skip-link and reload.
-- All 9 markers and 11 events present. Cards hidden initially. Last-event Next button disabled. Selected Great Falls event shows moment 5/11 and the matching card; Next opens Lemhi Pass.
-- Photograph decoded successfully at 1600 pixels wide. Mobile document width equals the 390-pixel viewport. No browser console warnings or errors observed.
-- Desktop and mobile screenshots are in `screenshots/`.
-- The staged deployment bundle was opened under `/_site/`: all 9 markers and 11 events rendered, and the Fort Clatsop card photograph loaded. This verifies relative asset paths for a GitHub Pages repository subpath.
+- Materializer and renderer builds passed. Output includes the homepage, physical Read/Hike/About entry pages, catalog, 11 events, 15 map features, 9 cards, and notes.
+- All seven Node materializer tests passed.
+- In-app browser checks covered desktop and mobile layouts: homepage highlights; independent Read/Hike lists; opening the expedition from each collection; standalone About; correct active navigation; missing-project recovery.
+- The map and timeline are sibling sections, with visible spacing between them. All 9 markers and 11 timeline events render. Great Falls selects moment 5/11 and the matching card; Next opens Lemhi Pass. View on map scrolls back to the map. Keyboard activation of St. Louis selects moment 11/11 and disables Next.
+- Desktop notes have a left section menu and right article. Mobile notes stack the menu above the article. Five section links and ten references render. References are below the article; citation links preserve the original linked words and direct readers to the numbered reference.
+- Section links preserve the project query and work after reload. Reference navigation moves keyboard focus to its target. New event URLs and legacy MVP links open the intended Fort Clatsop return event.
+- No document horizontal overflow observed on desktop or mobile, including the 390-pixel homepage and narrower article viewports. No browser console warnings/errors observed.
+- The staged deployment at `/_site/read/?project=lewis_and_clark_expedition` renders all markers and events, loads the local photograph, and preserves the deployment prefix in navigation, section links, and assets.
+- Current screenshots: `screenshots/home-desktop.png`, `screenshots/home-mobile.png`, and `screenshots/notes-mobile.png`. Other existing screenshots document the original MVP.
 - `git diff --check` passed.
 
-## Additional automation
+## Standalone browser suite
 
-`atlas.spec.js` supplies a repeatable Playwright desktop/mobile suite. Its syntax was checked, but the standalone Playwright runner was not executed successfully in this environment: the initial attempt could not bind its preview server inside the sandbox. The server was subsequently started with approved permissions and the interaction checks above were completed in the in-app browser instead. Install Chromium and run `npm test --prefix renderer` to execute this separate suite.
+`atlas.spec.js` was updated for the new navigation, independent timeline, article anchors, references, deep links, and keyboard interaction, with desktop/mobile projects. Its syntax check passed. The runner could not execute browser assertions because its Chromium executable is not installed. A sandboxed attempt also could not access the preview server; an approved retry reached the runner and confirmed the missing executable. The interactions above were verified using the in-app browser instead.
+
+To run the separate suite, install Chromium with `npx playwright install chromium` in `renderer/`, then run `npm test`.
 
 ## Scope
 
-The routes are schematic outbound connections. Return events are included, but the 1806 return branches are not mapped. Focus regions are editorial, and Natural Earth depicts modern generalized geography. No public deployment was performed.
+The expedition appears in both Read and Hike for this MVP, with a historical-route-study label in Hike. The existing schematic route and modern-geography limitations are unchanged. No public deployment, commit, or push was performed for these refinements.

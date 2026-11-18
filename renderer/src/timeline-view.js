@@ -7,10 +7,9 @@ export function createTimeline(container,events,onSelect) {
       const active=button.dataset.event===id;
       button.classList.toggle('selected',active);button.setAttribute('aria-pressed',String(active));
       if(active) {
-        // Scroll the timeline's own viewport, never jump the surrounding page.
         const viewport=container.parentElement;
-        const top=button.getBoundingClientRect().top-viewport.getBoundingClientRect().top+viewport.scrollTop;
-        if(top<viewport.scrollTop || top+button.offsetHeight>viewport.scrollTop+viewport.clientHeight) viewport.scrollTo({top:Math.max(0,top-60),behavior:'smooth'});
+        const rect=button.getBoundingClientRect(),frame=viewport.getBoundingClientRect();
+        if(rect.left<frame.left||rect.right>frame.right) viewport.scrollTo({left:Math.max(0,rect.left-frame.left+viewport.scrollLeft-12),behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
       }
     }
   }};

@@ -5,6 +5,10 @@
   "description": "Follow eleven moments from the Missouri River to the Pacific and back, 1804–1806.",
   "period": "1804–1806",
   "category": "Read",
+  "collections": [
+    "Read",
+    "Hike"
+  ],
   "map": {
     "basemap": "content/projects/lewis_and_clark_expedition/assets/maps/basemap.geojson",
     "style": "content/projects/lewis_and_clark_expedition/assets/maps/style.json",

@@ -48,4 +48,4 @@ for(const item of output) {
   }
   console.log(`Built ${item.id}: ${item.timeline.length} events, ${item.features.features.length} features, ${Object.keys(item.cards).length} cards`);
 }
-await writeFile(path.join(generated,'projects.json'),JSON.stringify(output.map(({project:p})=>({id:p.id,title:p.title,description:p.description,period:p.period,category:p.category})),null,2)+'\n');
+await writeFile(path.join(generated,'projects.json'),JSON.stringify(output.map(({project:p})=>({id:p.id,title:p.title,description:p.description,period:p.period,category:p.category,collections:p.collections||[p.category]})),null,2)+'\n');

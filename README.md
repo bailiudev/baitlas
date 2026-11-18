@@ -11,7 +11,7 @@ cd /Users/bailiu/Documents/Baitlas/repo
 python3 -m http.server 8000 --bind 127.0.0.1
 ```
 
-Open **http://127.0.0.1:8000**. Use an HTTP server; double-clicking `index.html` (`file://`) cannot load the JSON assets in browsers.
+Open **http://127.0.0.1:8000** for the highlights homepage. Read, Hike, and About have separate pages; the two collections link to project articles. Use an HTTP server; double-clicking `index.html` (`file://`) cannot load the JSON assets in browsers.
 
 The map uses locally bundled Leaflet, Natural Earth geography, and local media. No API key, CDN, tile server, or network request is needed at runtime. Source links open the original references when clicked.
 
@@ -51,7 +51,9 @@ npm test
 
 ```text
 .github/workflows/deploy.yml
-index.html
+index.html                          Highlights homepage
+read/index.html, hike/index.html   Article collections and project entries
+about/index.html                  About page
 materializer/
   package.json, package-lock.json
   src/build.js, validate.js, prepare-maps.js, parsers/content.js
@@ -59,7 +61,7 @@ materializer/
   tests/
 renderer/
   package.json, package-lock.json, build.js, playwright.config.js
-  src/app.js, project-loader.js, project-view.js, map-view.js
+  src/app.js, pages-view.js, project-loader.js, project-view.js, map-view.js
   src/timeline-view.js, card-view.js, notes-view.js, styles.css
   tests/
 content/
@@ -79,11 +81,11 @@ generated/
     project.json, features.geojson, timeline.json, cards.json, notes.html
 ```
 
-The necessary map-format deviation is **GeoJSON instead of PMTiles**: the provided map sources were Natural Earth shapefiles. `prepare-maps.js` clips and simplifies those local sources into one small regional vector file. `style.json` contains Leaflet path styles. No glyph fonts or sprite directories are needed because Leaflet draws these vector paths and markers directly. The additional build/configuration scripts make the authored/generated separation reproducible.
+The necessary map-format deviation is **GeoJSON instead of PMTiles**: the provided map sources were Natural Earth shapefiles. `prepare-maps.js` clips and simplifies those local sources into one small regional vector file. `style.json` contains Leaflet path styles. No glyph fonts or sprite directories are needed because Leaflet draws these vector paths and markers directly. The additional build/configuration scripts make the authored/generated separation reproducible. The renderer build also creates three small HTML entries (`read/`, `hike/`, and `about/`) from the shared root shell, so static hosting needs no URL rewrites. Edit the shell in `index.html` and rebuild to update them.
 
 ## Author content
 
-- `project.yaml`: title, descriptive metadata, basemap paths, visible bounds, and source list. Its `id` must match its folder name.
+- `project.yaml`: title, descriptive metadata, basemap paths, visible bounds, and source list. Its `id` must match its folder name. Optional `collections: [Read, Hike]` controls which article lists include the project; otherwise `category` supplies the collection.
 - `timeline.yaml`: dated events, each with a unique ID, a marker ID, summary, and source URL. Multiple events can refer to one place. Events are sorted by date during the build.
 - `map/markers.csv`: longitude/latitude in WGS84 decimal degrees, a unique marker ID, and the basename of its Markdown card. Quoted CSV fields can contain commas.
 - `map/routes/`: GeoJSON LineStrings. `properties` include a unique `id`, `kind: route`, `title`, hex `color`, description, and source.
@@ -96,7 +98,9 @@ The materializer checks schemas, coordinates, real calendar dates, duplicate IDs
 
 Select a timeline event or numbered place to open its card and center the map. Cards start hidden. Use previous/next to move through events, **Full expedition** to restore the overview, and checkboxes to toggle routes, places, or regions. Maps support dragging, touch zoom, zoom buttons, and keyboard panning. Mouse-wheel zoom is disabled to preserve normal page scrolling.
 
-Read and Hike use the same page design and sample content, as specified. Hike includes a note explaining that this historical example is not a navigable hiking route. Explore stories displays the project catalog. About explains the atlas. Selected events have reloadable URLs, e.g. `#lewis_and_clark_expedition/leave-clatsop`.
+Read and Hike are independent article collections. The sample expedition appears in both; Hike labels it as a historical route study. About is a separate page. Each project has a full-width map, a separate horizontal timeline below it, and an article with a left-hand section menu. References appear at the bottom of the article. On small screens the section menu stacks above the text.
+
+Selected events have reloadable URLs, e.g. `read/?project=lewis_and_clark_expedition#event=leave-clatsop`. Section and numbered reference links preserve the current project. Links shared by the first MVP (`#lewis_and_clark_expedition/leave-clatsop`) redirect to the new article URL.
 
 ## Historical scope and provenance
 
@@ -106,4 +110,4 @@ The supplied Natural Earth datasets are public domain and represent **generalize
 
 ## GitHub Pages
 
-The existing workflow installs dependencies, builds and validates content, bundles the renderer, and packages only `index.html`, `generated/`, and project runtime assets. Source shapefiles and `node_modules` are excluded from the deployed artifact. Paths are relative, so the site supports repository subpaths on GitHub Pages. Deployment occurs on a push to `main` or manual workflow dispatch; this implementation does not push or deploy automatically.
+The existing workflow installs dependencies, builds and validates content, bundles the renderer, and packages `index.html`, the `read/`, `hike/`, and `about/` page entries, `generated/`, and project runtime assets. Source shapefiles and `node_modules` are excluded from the deployed artifact. Paths are relative, so the site supports repository subpaths on GitHub Pages. Deployment occurs on a push to `main` or manual workflow dispatch; this implementation does not push or deploy automatically.

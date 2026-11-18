@@ -4,6 +4,7 @@ subtitle: Along the rivers. Across the divide.
 description: Follow eleven moments from the Missouri River to the Pacific and back, 1804–1806.
 period: 1804–1806
 category: Read
+collections: [Read, Hike]
 map:
   basemap: assets/maps/basemap.geojson
   style: assets/maps/style.json

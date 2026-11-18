@@ -38,7 +38,7 @@ jobs:
         run: |
           mkdir -p _site/content/projects
           cp index.html _site/
-          cp -R generated _site/
+          cp -R generated read hike about _site/
           for project in content/projects/*; do
             if [ -d "$project/assets" ]; then
               mkdir -p "_site/$project"

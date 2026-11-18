@@ -4,6 +4,10 @@
     "title": "Lewis & Clark Expedition",
     "description": "Follow eleven moments from the Missouri River to the Pacific and back, 1804–1806.",
     "period": "1804–1806",
-    "category": "Read"
+    "category": "Read",
+    "collections": [
+      "Read",
+      "Hike"
+    ]
   }
 ]
