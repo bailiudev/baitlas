@@ -67,9 +67,7 @@ content/
   shared/assets/maps/sources/       Original supplied Natural Earth datasets
   projects/lewis_and_clark_expedition/
     project.yaml, timeline.yaml, notes.md
-    map/config.yaml, labels.geojson, markers.csv
-    map/routes/*.geojson
-    map/regions/*.geojson
+    map/config.yaml, points.yaml, labels.yaml, routes.yaml, regions.yaml
     cards/*.md
     assets/maps/basemap.geojson, style.json, README.md
     assets/images/fort-clatsop.jpg, README.md
@@ -81,7 +79,7 @@ generated/
     project.json, map.json, features.geojson, timeline.json, cards.json, notes.html
 ```
 
-The necessary map-format deviation is **GeoJSON instead of PMTiles**: the provided map sources were Natural Earth shapefiles. `prepare-maps.js` clips and simplifies those local sources into one small regional vector file. `style.json` contains Leaflet path styles. No glyph fonts or sprite directories are needed because Leaflet draws these vector paths and markers directly. The additional build/configuration scripts make the authored/generated separation reproducible. The renderer uses `index.html` for every view. The `page` and optional `project` query parameters select the content without server rewrites. Edit the shell in `index.html` and rebuild the renderer for code or style changes.
+The necessary basemap-format deviation is **GeoJSON instead of PMTiles**: the provided map sources were Natural Earth shapefiles. `prepare-maps.js` clips and simplifies those local sources into one small regional vector file. Authored points, labels, routes, and regions use YAML; the materializer converts them to `generated/.../features.geojson` for the renderer. `style.json` contains Leaflet path styles. No glyph fonts or sprite directories are needed because Leaflet draws these vector paths and markers directly. The additional build/configuration scripts make the authored/generated separation reproducible. The renderer uses `index.html` for every view. The `page` and optional `project` query parameters select the content without server rewrites. Edit the shell in `index.html` and rebuild the renderer for code or style changes.
 
 ## Author content
 
@@ -89,13 +87,13 @@ The necessary map-format deviation is **GeoJSON instead of PMTiles**: the provid
 - `project.yaml`: title, descriptive metadata, and source list. Its `id` must match its folder name. Optional `collections: [Read, Hike]` controls which article lists include the project; otherwise `category` supplies the collection.
 - `map/config.yaml`: basemap and style paths, visible bounds, and map presentation fields such as attribution, marker pixel anchors, caption, period, disclaimer, and route/region notes.
 - `timeline.yaml`: dated events, each with a unique ID, a marker ID, summary, and source URL. Multiple events can refer to one place. Events are sorted by date during the build.
-- `map/markers.csv`: longitude/latitude in WGS84 decimal degrees, a unique marker ID, and the basename of its Markdown card. Quoted CSV fields can contain commas.
-- `map/labels.geojson`: optional GeoJSON FeatureCollection of noninteractive geographic labels. Each Point has a unique `id`, `kind: label`, display `text`, and a `style` of `ocean`, `mountain`, or `river`.
-- `map/routes/`: GeoJSON LineStrings. `properties` include a unique `id`, `kind: route`, `title`, hex `color`, description, and source. Optional `legend_label` supplies a short legend name; otherwise the route title is used. `legend_order` sets display order. Legend colors come from route colors.
-- `map/regions/`: GeoJSON Polygons with closed rings; use `kind: region`.
+- `map/points.yaml`: `markers` with unique IDs, WGS84 `[longitude, latitude]` coordinates, and Markdown card names. These are the selectable locations for timeline events and information cards.
+- `map/labels.yaml`: `labels` with text, coordinates, and an ocean/mountain/river style.
+- `map/routes.yaml`: route metadata and ordered `path` coordinates, each `[longitude, latitude]`. Routes are independent of the points used for cards. Optional `legend_label` and `legend_order` control the legend.
+- `map/regions.yaml`: region metadata and `boundary` coordinates, each `[longitude, latitude]`. Regions are independent of card points. The materializer closes each polygon automatically.
 - `cards/` and `notes.md`: Markdown, with local image paths relative to the project root, such as `assets/images/fort-clatsop.jpg`. HTML is sanitized. Raw scripts and unsafe URLs are removed. Image files must exist.
 
-The materializer checks schemas, coordinates, real calendar dates, duplicate IDs, marker/card references, closed regions, and required assets before emitting generated files. Rebuild both packages after edits affecting both content and renderer. Serve the repository root, since generated metadata references project assets in `content/`.
+The materializer checks schemas, coordinates, real calendar dates, duplicate IDs, marker/card references, region boundaries, and required assets before emitting generated files. Rebuild the materializer after editing authored map content. Serve the repository root, since generated metadata references project assets in `content/`.
 
 ## Interaction
 

@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {validateContent} from '../src/validate.js';
-import {markdown,markers,yaml} from '../src/parsers/content.js';
+import {markdown,mapFeatures,yaml} from '../src/parsers/content.js';
 const root=new URL('../../',import.meta.url);
 const json=async p=>JSON.parse(await readFile(new URL(p,root),'utf8'));
 async function fixture(){
@@ -19,10 +19,26 @@ test('compiled sample has valid coordinates, card references, and chronological 
 });
 test('rejects a broken event-to-marker link',async()=>{const a=await fixture();a[2].events[0].marker='missing';assert.throws(()=>validateContent(...a),/Missing marker/);});
 test('rejects impossible dates',async()=>{const a=await fixture();a[2].events[0].date='1804-02-31';assert.throws(()=>validateContent(...a),/Invalid date/);});
-test('rejects invalid and empty coordinates',async()=>{const a=await fixture();a[3][0].geometry.coordinates=[200,45];assert.throws(()=>validateContent(...a),/Invalid coordinate/);assert.ok(Number.isNaN(markers('id,title,latitude,longitude,card\nx,X,,5,x')[0].geometry.coordinates[1]));});
+test('rejects invalid and empty coordinates',async()=>{const a=await fixture();a[3][0].geometry.coordinates=[200,45];assert.throws(()=>validateContent(...a),/Invalid coordinate/);const b=await fixture();b[3][0].geometry.coordinates=[-90.1,null];assert.throws(()=>validateContent(...b),/Invalid coordinate/);});
 test('rejects missing cards and unclosed regions',async()=>{const a=await fixture();a[4]={};assert.throws(()=>validateContent(...a),/Missing card/);const b=await fixture();b[3].find(f=>f.properties.kind==='region').geometry.coordinates[0].pop();assert.throws(()=>validateContent(...b),/Unclosed region/);});
-test('supports quoted CSV commas and removes executable Markdown',()=>{
- assert.equal(markers('id,title,latitude,longitude,card\nx,"A, B",40,-100,x')[0].properties.title,'A, B');
+test('builds coordinate-only routes and regions independently of card points',async()=>{
+ const base='content/projects/lewis_and_clark_expedition/map/';
+ const [points,labels,routes,regions]=await Promise.all(['points','labels','routes','regions'].map(name=>readFile(new URL(base+name+'.yaml',root),'utf8').then(yaml)));
+ const features=mapFeatures(points,labels,routes,regions);
+ assert.equal(points.labels,undefined);
+ assert.equal(labels.labels.length,4);
+ const marker=features.find(f=>f.properties.id==='camp-dubois');
+ const route=features.find(f=>f.properties.id==='missouri');
+ assert.deepEqual(route.geometry.coordinates[0],marker.geometry.coordinates);
+ const changed=structuredClone(points);changed.markers[0].coordinates=[-90.2,38.8];
+ assert.deepEqual(mapFeatures(changed,labels,routes,regions).find(f=>f.properties.id==='missouri').geometry.coordinates[0],[-90.1,38.802]);
+ assert.deepEqual(features.find(f=>f.properties.kind==='region').geometry.coordinates[0].at(-1),features.find(f=>f.properties.kind==='region').geometry.coordinates[0][0]);
+ const broken=structuredClone(routes);broken.routes[0].path[0]={marker:'missing'};
+ assert.throws(()=>mapFeatures(points,labels,broken,regions),/array of \[longitude, latitude\] coordinates/);
+ const brokenRegion=structuredClone(regions);brokenRegion.regions[0].boundary[0]={marker:'camp-dubois'};
+ assert.throws(()=>mapFeatures(points,labels,routes,brokenRegion),/array of \[longitude, latitude\] coordinates/);
+});
+test('removes executable Markdown',()=>{
  const html=markdown('# A\n<script>alert(1)</script>\n<a href="javascript:alert(1)">bad</a>\n![Photo](assets/images/test.jpg)','sample');
  assert.ok(!html.includes('<script'));assert.ok(!html.includes('javascript:'));assert.ok(html.includes('content/projects/sample/assets/images/test.jpg'));
  assert.throws(()=>markdown('![Photo](assets/images/../../private.jpg)','sample'),/Image must be inside/);

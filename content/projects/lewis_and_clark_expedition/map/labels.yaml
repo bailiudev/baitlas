@@ -1,0 +1,17 @@
+labels:
+  - id: pacific-ocean-label
+    text: "PACIFIC\nOCEAN"
+    coordinates: [-126.8, 43.8]
+    style: ocean
+  - id: rocky-mountains-label
+    text: ROCKY MOUNTAINS
+    coordinates: [-113.5, 43.5]
+    style: mountain
+  - id: missouri-river-label
+    text: MISSOURI RIVER
+    coordinates: [-102, 44.8]
+    style: river
+  - id: columbia-river-label
+    text: COLUMBIA RIVER
+    coordinates: [-120, 44.8]
+    style: river

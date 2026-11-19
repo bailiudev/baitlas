@@ -1,7 +1,7 @@
 import {readFile,writeFile,readdir,mkdir,access} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {yaml,markers,markdown} from './parsers/content.js';
+import {yaml,mapFeatures,markdown} from './parsers/content.js';
 import {validateContent} from './validate.js';
 const root=fileURLToPath(new URL('../../',import.meta.url));
 const content=path.join(root,'content/projects');
@@ -17,18 +17,7 @@ for(const entry of (await readdir(content,{withFileTypes:true})).sort((a,b)=>a.n
   if(project.id!==id || !/^[a-z0-9_-]+$/.test(id)) throw new Error(`Project ID must match its folder: ${id}`);
   const map=yaml(await read(path.join(dir,'map/config.yaml')));
   const timeline=yaml(await read(path.join(dir,'timeline.yaml')));
-  const features=markers(await read(path.join(dir,'map/markers.csv')));
-  if((await readdir(path.join(dir,'map'))).includes('labels.geojson')) {
-    const labels=await json(path.join(dir,'map/labels.geojson'));
-    if(labels.type!=='FeatureCollection' || !Array.isArray(labels.features)) throw new Error('map/labels.geojson must be a FeatureCollection');
-    features.push(...labels.features);
-  }
-  for(const kind of ['routes','regions']) for(const file of (await readdir(path.join(dir,'map',kind))).sort()) {
-    if(file.endsWith('.geojson')) {
-      const data=await json(path.join(dir,'map',kind,file));
-      features.push(...(data.type==='FeatureCollection'?data.features:[data]));
-    }
-  }
+  const features=mapFeatures(...await Promise.all(['points','labels','routes','regions'].map(name=>read(path.join(dir,'map',`${name}.yaml`)).then(yaml))));
   const cards=Object.create(null);
   for(const file of (await readdir(path.join(dir,'cards'))).sort()) {
     if(file.endsWith('.md')) cards[path.basename(file,'.md')]=markdown(await read(path.join(dir,'cards',file)),id);

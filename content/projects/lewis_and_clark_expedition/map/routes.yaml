@@ -1,0 +1,91 @@
+routes:
+  - id: missouri
+    legend_order: 1
+    legend_label: Missouri
+    title: Up the Missouri
+    color: "#ae6746"
+    period: "1804"
+    approximate: true
+    description: "Schematic outbound route connecting selected geographic anchors; not a survey or hiking trail. The 1806 return branches are not drawn."
+    source: "https://www.nps.gov/mnrr/learn/historyculture/the-lewis-and-clark-expedition.htm"
+    path:
+      - [-90.1, 38.802]
+      - [-90.48, 38.78]
+      - [-91.04, 38.57]
+      - [-92.18, 38.59]
+      - [-92.75, 38.98]
+      - [-93.52, 39.22]
+      - [-94.6, 39.12]
+      - [-95.02, 39.8]
+      - [-95.89, 41.26]
+      - [-96.408, 42.453]
+      - [-97.4, 42.85]
+      - [-98.4, 43.05]
+      - [-99.38, 43.75]
+      - [-100.35, 44.37]
+      - [-100.4, 45]
+      - [-100.6, 46]
+      - [-100.8, 46.8]
+      - [-101.47, 47.29]
+  - id: pacific
+    legend_order: 3
+    legend_label: Pacific
+    title: Across to the Pacific
+    color: "#3e7776"
+    period: "1805"
+    approximate: true
+    description: "Schematic outbound route connecting selected geographic anchors; not a survey or hiking trail. The 1806 return branches are not drawn."
+    source: "https://www.nps.gov/mnrr/learn/historyculture/the-lewis-and-clark-expedition.htm"
+    path:
+      - [-113.445, 44.974]
+      - [-113.9, 45.17]
+      - [-113.97, 45.7]
+      - [-114.1, 46.15]
+      - [-114.08, 46.76]
+      - [-114.58, 46.63]
+      - [-115, 46.5]
+      - [-115.5, 46.55]
+      - [-115.92, 46.35]
+      - [-116.25, 46.5]
+      - [-116.6, 46.47]
+      - [-117.03, 46.42]
+      - [-117.8, 46.6]
+      - [-118.5, 46.6]
+      - [-119.05, 46.25]
+      - [-119.5, 45.95]
+      - [-120.7, 45.72]
+      - [-121.5, 45.7]
+      - [-122.75, 45.65]
+      - [-122.88, 46.1]
+      - [-123.4, 46.15]
+      - [-123.919, 46.251]
+      - [-123.88, 46.134]
+  - id: upper-missouri
+    legend_order: 2
+    legend_label: Continental divide
+    title: Toward the divide
+    color: "#bd8a3d"
+    period: "1805"
+    approximate: true
+    description: "Schematic outbound route connecting selected geographic anchors; not a survey or hiking trail. The 1806 return branches are not drawn."
+    source: "https://www.nps.gov/subjects/travellewisandclark/expedition-by-date.htm"
+    path:
+      - [-101.47, 47.29]
+      - [-102.2, 47.7]
+      - [-103.3, 48.05]
+      - [-104.05, 48]
+      - [-105.15, 48.1]
+      - [-106.4, 48]
+      - [-107.4, 47.6]
+      - [-108.5, 47.6]
+      - [-109.6, 47.75]
+      - [-110.67, 47.82]
+      - [-111.12, 47.57]
+      - [-111.4, 47]
+      - [-111.95, 46.6]
+      - [-111.5, 45.93]
+      - [-111.8, 45.9]
+      - [-112.4, 45.55]
+      - [-112.7, 45.2]
+      - [-112.86, 44.99]
+      - [-113.445, 44.974]

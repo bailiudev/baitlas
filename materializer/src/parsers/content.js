@@ -1,13 +1,33 @@
 import {parse as yaml} from 'yaml';
-import {parse as csv} from 'csv-parse/sync';
 import {marked} from 'marked';
 import sanitizeHtml from 'sanitize-html';
 export {yaml};
-export function markers(text) {
-  return csv(text,{columns:true,skip_empty_lines:true,bom:true}).map(row=>({
-    type:'Feature', properties:{id:row.id,title:row.title,card:row.card,kind:'marker',category:row.kind,location_note:row.location_note,source:row.source},
-    geometry:{type:'Point',coordinates:[row.longitude.trim()===''?NaN:Number(row.longitude),row.latitude.trim()===''?NaN:Number(row.latitude)]}
-  }));
+export function mapFeatures(points, labels, routes, regions) {
+  if(!Array.isArray(points?.markers) || !Array.isArray(labels?.labels) || !Array.isArray(routes?.routes) || !Array.isArray(regions?.regions)) throw new Error('Map YAML needs markers, labels, routes, and regions lists');
+  if('labels' in points) throw new Error('Labels belong in labels.yaml, not points.yaml');
+  const markerIds=new Set();
+  const features=[];
+  for(const {id,title,coordinates,card,...properties} of points.markers) {
+    if(markerIds.has(id)) throw new Error(`Duplicate marker: ${id}`);
+    markerIds.add(id);
+    features.push({type:'Feature',properties:{id,title,card,kind:'marker',...properties},geometry:{type:'Point',coordinates}});
+  }
+  for(const {id,coordinates,...properties} of labels.labels) {
+    features.push({type:'Feature',properties:{id,kind:'label',...properties},geometry:{type:'Point',coordinates}});
+  }
+  const coordinatePath=(path,context)=>{
+    if(!Array.isArray(path) || !path.every(Array.isArray)) throw new Error(`${context} needs an array of [longitude, latitude] coordinates`);
+    return path;
+  };
+  for(const {id,path,...properties} of routes.routes) {
+    features.push({type:'Feature',properties:{id,kind:'route',...properties},geometry:{type:'LineString',coordinates:coordinatePath(path,`Route ${id}`)}});
+  }
+  for(const {id,boundary,...properties} of regions.regions) {
+    const ring=[...coordinatePath(boundary,`Region ${id}`)];
+    if(ring.length && JSON.stringify(ring[0])!==JSON.stringify(ring.at(-1))) ring.push([...ring[0]]);
+    features.push({type:'Feature',properties:{id,kind:'region',...properties},geometry:{type:'Polygon',coordinates:[ring]}});
+  }
+  return features;
 }
 export function markdown(text, id) {
   return sanitizeHtml(marked.parse(text), {
