@@ -175,6 +175,70 @@
     {
       "type": "Feature",
       "properties": {
+        "id": "pacific-ocean-label",
+        "kind": "label",
+        "text": "PACIFIC\nOCEAN",
+        "style": "ocean"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -126.8,
+          43.8
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "rocky-mountains-label",
+        "kind": "label",
+        "text": "ROCKY MOUNTAINS",
+        "style": "mountain"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -113.5,
+          43.5
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "missouri-river-label",
+        "kind": "label",
+        "text": "MISSOURI RIVER",
+        "style": "river"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -102,
+          44.8
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "columbia-river-label",
+        "kind": "label",
+        "text": "COLUMBIA RIVER",
+        "style": "river"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -120,
+          44.8
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
         "id": "missouri",
         "kind": "route",
         "legend_order": 1,

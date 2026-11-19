@@ -7,9 +7,9 @@ export async function fetchData(path, asText=false) {
 export async function loadProject(id) {
   if(!/^[a-z0-9_-]+$/.test(id)) throw new Error('Invalid project identifier');
   const base=`generated/projects/${id}/`;
-  const [project,features,timeline,cards,notes]=await Promise.all(['project.json','features.geojson','timeline.json','cards.json','notes.html'].map(file=>fetchData(base+file,file.endsWith('.html'))));
-  const [basemap,style]=await Promise.all([fetchData(project.map.basemap),fetchData(project.map.style)]);
-  return {project,features,timeline,cards,notes,basemap,style};
+  const [project,map,features,timeline,cards,notes]=await Promise.all(['project.json','map.json','features.geojson','timeline.json','cards.json','notes.html'].map(file=>fetchData(base+file,file.endsWith('.html'))));
+  const [basemap,style]=await Promise.all([fetchData(map.basemap),fetchData(map.style)]);
+  return {project,map,features,timeline,cards,notes,basemap,style};
 }
 export function dateLabel(date) {
   return new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',year:'numeric',timeZone:'UTC'}).format(new Date(date+'T00:00:00Z'));

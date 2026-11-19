@@ -67,7 +67,7 @@ content/
   shared/assets/maps/sources/       Original supplied Natural Earth datasets
   projects/lewis_and_clark_expedition/
     project.yaml, timeline.yaml, notes.md
-    map/markers.csv
+    map/config.yaml, labels.geojson, markers.csv
     map/routes/*.geojson
     map/regions/*.geojson
     cards/*.md
@@ -78,7 +78,7 @@ generated/
   about.html                       Sanitized About content
   projects.json
   projects/lewis_and_clark_expedition/
-    project.json, features.geojson, timeline.json, cards.json, notes.html
+    project.json, map.json, features.geojson, timeline.json, cards.json, notes.html
 ```
 
 The necessary map-format deviation is **GeoJSON instead of PMTiles**: the provided map sources were Natural Earth shapefiles. `prepare-maps.js` clips and simplifies those local sources into one small regional vector file. `style.json` contains Leaflet path styles. No glyph fonts or sprite directories are needed because Leaflet draws these vector paths and markers directly. The additional build/configuration scripts make the authored/generated separation reproducible. The renderer uses `index.html` for every view. The `page` and optional `project` query parameters select the content without server rewrites. Edit the shell in `index.html` and rebuild the renderer for code or style changes.
@@ -86,9 +86,11 @@ The necessary map-format deviation is **GeoJSON instead of PMTiles**: the provid
 ## Author content
 
 - `content/about.md`: all About copy. Use an introductory eyebrow paragraph, one H1, then the lead paragraph and article sections. The renderer supplies layout and typography. The materializer sanitizes this into `generated/about.html`; rebuild the materializer after copy edits. About links such as `?page=read` resolve from the site root, including on repository subpaths.
-- `project.yaml`: title, descriptive metadata, basemap paths, visible bounds, and source list. Its `id` must match its folder name. Optional map presentation fields include `attribution`, `labels` (text, WGS84 longitude/latitude, and ocean/mountain/river style), `markerAnchors` (marker ID to pixel anchor), `caption`, `period`, `disclaimer`, `routeNote`, and `regionNote`. Optional `collections: [Read, Hike]` controls which article lists include the project; otherwise `category` supplies the collection.
+- `project.yaml`: title, descriptive metadata, and source list. Its `id` must match its folder name. Optional `collections: [Read, Hike]` controls which article lists include the project; otherwise `category` supplies the collection.
+- `map/config.yaml`: basemap and style paths, visible bounds, and map presentation fields such as attribution, marker pixel anchors, caption, period, disclaimer, and route/region notes.
 - `timeline.yaml`: dated events, each with a unique ID, a marker ID, summary, and source URL. Multiple events can refer to one place. Events are sorted by date during the build.
 - `map/markers.csv`: longitude/latitude in WGS84 decimal degrees, a unique marker ID, and the basename of its Markdown card. Quoted CSV fields can contain commas.
+- `map/labels.geojson`: optional GeoJSON FeatureCollection of noninteractive geographic labels. Each Point has a unique `id`, `kind: label`, display `text`, and a `style` of `ocean`, `mountain`, or `river`.
 - `map/routes/`: GeoJSON LineStrings. `properties` include a unique `id`, `kind: route`, `title`, hex `color`, description, and source. Optional `legend_label` supplies a short legend name; otherwise the route title is used. `legend_order` sets display order. Legend colors come from route colors.
 - `map/regions/`: GeoJSON Polygons with closed rings; use `kind: region`.
 - `cards/` and `notes.md`: Markdown, with local image paths relative to the project root, such as `assets/images/fort-clatsop.jpg`. HTML is sanitized. Raw scripts and unsafe URLs are removed. Image files must exist.

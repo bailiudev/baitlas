@@ -30,6 +30,7 @@ test('independent timeline below map synchronizes cards and layers',async({page}
  page.on('request',r=>{if(!r.url().startsWith('http://127.0.0.1:8000'))remote.push(r.url());});
  await page.goto(project);
  await expect(page.locator('.place-marker')).toHaveCount(9);
+ await expect(page.locator('.geographic-label')).toHaveCount(4);
  await expect(page.locator('.timeline-event')).toHaveCount(11);
  await expect(page.locator('#place-card')).toBeHidden();
  expect(await page.evaluate(()=>{

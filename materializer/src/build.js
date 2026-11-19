@@ -15,8 +15,14 @@ for(const entry of (await readdir(content,{withFileTypes:true})).sort((a,b)=>a.n
   const id=entry.name, dir=path.join(content,id);
   const project=yaml(await read(path.join(dir,'project.yaml')));
   if(project.id!==id || !/^[a-z0-9_-]+$/.test(id)) throw new Error(`Project ID must match its folder: ${id}`);
+  const map=yaml(await read(path.join(dir,'map/config.yaml')));
   const timeline=yaml(await read(path.join(dir,'timeline.yaml')));
   const features=markers(await read(path.join(dir,'map/markers.csv')));
+  if((await readdir(path.join(dir,'map'))).includes('labels.geojson')) {
+    const labels=await json(path.join(dir,'map/labels.geojson'));
+    if(labels.type!=='FeatureCollection' || !Array.isArray(labels.features)) throw new Error('map/labels.geojson must be a FeatureCollection');
+    features.push(...labels.features);
+  }
   for(const kind of ['routes','regions']) for(const file of (await readdir(path.join(dir,'map',kind))).sort()) {
     if(file.endsWith('.geojson')) {
       const data=await json(path.join(dir,'map',kind,file));
@@ -28,24 +34,24 @@ for(const entry of (await readdir(content,{withFileTypes:true})).sort((a,b)=>a.n
     if(file.endsWith('.md')) cards[path.basename(file,'.md')]=markdown(await read(path.join(dir,'cards',file)),id);
   }
   const notes=markdown(await read(path.join(dir,'notes.md')),id);
-  validateContent(project,timeline,features,cards);
+  validateContent(project,map,timeline,features,cards);
   for(const key of ['basemap','style']) {
-    const relative=project.map[key];
+    const relative=map[key];
     if(relative.split('/').includes('..')) throw new Error(`Unsafe asset path: ${relative}`);
     const value=await json(path.join(dir,relative));
     if(key==='basemap' && (value.type!=='FeatureCollection' || !value.features.length)) throw new Error('Basemap is empty or invalid');
-    project.map[key]=`content/projects/${id}/${relative}`;
+    map[key]=`content/projects/${id}/${relative}`;
   }
   for(const html of [...Object.values(cards),notes]) for(const m of html.matchAll(/src="([^"]+)"/g)) await access(path.join(root,m[1]));
   timeline.events.sort((a,b)=>a.date.localeCompare(b.date));
-  output.push({id,project,timeline:timeline.events,features:{type:'FeatureCollection',features},cards,notes});
+  output.push({id,project,map,timeline:timeline.events,features:{type:'FeatureCollection',features},cards,notes});
 }
 // Validate every project before replacing generated content.
 await mkdir(generated,{recursive:true});
 await writeFile(path.join(generated,'about.html'),about);
 for(const item of output) {
   const dest=path.join(generated,'projects',item.id);await mkdir(dest,{recursive:true});
-  for(const [name,value] of Object.entries({'project.json':item.project,'timeline.json':item.timeline,'features.geojson':item.features,'cards.json':item.cards,'notes.html':item.notes})) {
+  for(const [name,value] of Object.entries({'project.json':item.project,'map.json':item.map,'timeline.json':item.timeline,'features.geojson':item.features,'cards.json':item.cards,'notes.html':item.notes})) {
     await writeFile(path.join(dest,name),typeof value==='string'?value:JSON.stringify(value,null,2)+'\n');
   }
   console.log(`Built ${item.id}: ${item.timeline.length} events, ${item.features.features.length} features, ${Object.keys(item.cards).length} cards`);
