@@ -52,7 +52,6 @@ npm test
 ```text
 .github/workflows/deploy.yml
 index.html                          Shared entry for Home, Read, Hike, About, and articles
-404.html                            Redirects earlier collection URLs on GitHub Pages
 materializer/
   package.json, package-lock.json
   src/build.js, validate.js, prepare-maps.js, parsers/content.js
@@ -82,7 +81,7 @@ generated/
     project.json, features.geojson, timeline.json, cards.json, notes.html
 ```
 
-The necessary map-format deviation is **GeoJSON instead of PMTiles**: the provided map sources were Natural Earth shapefiles. `prepare-maps.js` clips and simplifies those local sources into one small regional vector file. `style.json` contains Leaflet path styles. No glyph fonts or sprite directories are needed because Leaflet draws these vector paths and markers directly. The additional build/configuration scripts make the authored/generated separation reproducible. The renderer uses `index.html` for every view. The `page` and optional `project` query parameters select the content without server rewrites. `404.html` redirects earlier directory URLs on GitHub Pages. Edit the shell in `index.html` and rebuild the renderer for code or style changes.
+The necessary map-format deviation is **GeoJSON instead of PMTiles**: the provided map sources were Natural Earth shapefiles. `prepare-maps.js` clips and simplifies those local sources into one small regional vector file. `style.json` contains Leaflet path styles. No glyph fonts or sprite directories are needed because Leaflet draws these vector paths and markers directly. The additional build/configuration scripts make the authored/generated separation reproducible. The renderer uses `index.html` for every view. The `page` and optional `project` query parameters select the content without server rewrites. Edit the shell in `index.html` and rebuild the renderer for code or style changes.
 
 ## Author content
 
@@ -112,7 +111,7 @@ The supplied Natural Earth datasets are public domain and represent **generalize
 
 ## GitHub Pages
 
-The existing workflow installs dependencies, builds and validates content, bundles the renderer, and packages `index.html`, `404.html`, `generated/`, and project runtime assets. Source shapefiles and `node_modules` are excluded from the deployed artifact. Paths are relative, so the site supports repository subpaths on GitHub Pages. Deployment occurs on a push to `main` or manual workflow dispatch; this implementation does not push or deploy automatically.
+The existing workflow installs dependencies, builds and validates content, bundles the renderer, and packages `index.html`, `generated/`, and project runtime assets. Source shapefiles and `node_modules` are excluded from the deployed artifact. Paths are relative, so the site supports repository subpaths on GitHub Pages. Deployment occurs on a push to `main` or manual workflow dispatch.
 
 ## Renderer boundaries
 
