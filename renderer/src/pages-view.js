@@ -18,6 +18,15 @@ export function renderCollection(container,catalog,collection) {
   const hike=collection==='hike', articles=catalog.filter(p=>inCollection(p,collection));
   container.innerHTML=`<section class="collection-heading"><p class="eyebrow">THE ${hike?'ROUTE':'READING'} COLLECTION</p><h1>${hike?'Follow the route.':'Get lost in a story.'}</h1><p>${hike?'Explore the places and landscapes along a journey.':'Journeys through time, anchored in place.'}</p></section><section class="article-list-section" aria-label="${hike?'Hike':'Read'} articles"><div class="section-label"><h2 class="eyebrow">${hike?'ROUTES & FIELD NOTES':'STORIES & EXPEDITIONS'}</h2><span>${articles.length} ${articles.length===1?'article':'articles'}</span></div><ul class="article-list">${articles.map((p,i)=>articleRow(p,collection,i)).join('')}</ul>${!articles.length?'<p class="empty-collection">New articles are on their way.</p>':''}</section>${hike?'<p class="collection-footnote">This collection begins with a historical route study. It is a companion for exploration, not a guide to a present-day hiking trail.</p>':''}`;
 }
-export function renderAbout(container) {
-  container.innerHTML=`<section class="about-page"><p class="eyebrow">ABOUT BAITLAS</p><h1>Every story<br>has a <em>place.</em></h1><div class="about-copy prose"><p class="about-lead">Baitlas is an atlas for following your curiosity.</p><p>A map gives a story somewhere to happen. A timeline gives it a rhythm. Field notes leave room for the people, details, and questions along the way.</p><h2>Two ways into the atlas</h2><p><a href="read/">Read</a> collects stories and expeditions. <a href="hike/">Hike</a> looks at journeys through their routes and landscapes. Both bring you to the same kind of article: a map to explore, moments to follow, and notes to read.</p><h2>Begin with a journey west</h2><p>The first story follows the Lewis & Clark Expedition. Historical sources accompany the account, and approximate geography is identified on the map. The historical route study is not a modern hiking guide.</p><a class="underlined-link" href="read/">Find a story <span aria-hidden="true">↗</span></a></div></section>`;
+export function renderAbout(container,html) {
+  container.innerHTML=`<section class="about-page">${html}</section>`;
+  const section=container.querySelector('.about-page');
+  const title=section.querySelector('h1');
+  const eyebrow=section.firstElementChild;
+  if(eyebrow?.tagName==='P')eyebrow.classList.add('eyebrow');
+  const body=document.createElement('div');body.className='about-copy prose';
+  if(title)while(title.nextSibling)body.append(title.nextSibling);
+  body.querySelector('p')?.classList.add('about-lead');
+  body.querySelector('p:last-child > a:only-child')?.classList.add('underlined-link');
+  section.append(body);
 }

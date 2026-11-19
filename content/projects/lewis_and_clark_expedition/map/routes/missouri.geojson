@@ -3,6 +3,8 @@
   "properties": {
     "id": "missouri",
     "kind": "route",
+    "legend_order": 1,
+    "legend_label": "Missouri",
     "title": "Up the Missouri",
     "color": "#ae6746",
     "period": "1804",

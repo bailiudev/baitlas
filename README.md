@@ -65,6 +65,7 @@ renderer/
   src/timeline-view.js, card-view.js, notes-view.js, styles.css
   tests/
 content/
+  about.md                         Site About copy
   shared/assets/maps/sources/       Original supplied Natural Earth datasets
   projects/lewis_and_clark_expedition/
     project.yaml, timeline.yaml, notes.md
@@ -76,6 +77,7 @@ content/
     assets/images/fort-clatsop.jpg, README.md
 generated/
   renderer/                        Bundled browser JavaScript, CSS, Leaflet assets/license
+  about.html                       Sanitized About content
   projects.json
   projects/lewis_and_clark_expedition/
     project.json, features.geojson, timeline.json, cards.json, notes.html
@@ -85,10 +87,11 @@ The necessary map-format deviation is **GeoJSON instead of PMTiles**: the provid
 
 ## Author content
 
-- `project.yaml`: title, descriptive metadata, basemap paths, visible bounds, and source list. Its `id` must match its folder name. Optional `collections: [Read, Hike]` controls which article lists include the project; otherwise `category` supplies the collection.
+- `content/about.md`: all About copy. Use an introductory eyebrow paragraph, one H1, then the lead paragraph and article sections. The renderer supplies layout and typography. The materializer sanitizes this into `generated/about.html`; rebuild the materializer after copy edits. About links such as `read/` resolve from the site root, including on repository subpaths.
+- `project.yaml`: title, descriptive metadata, basemap paths, visible bounds, and source list. Its `id` must match its folder name. Optional map presentation fields include `attribution`, `labels` (text, WGS84 longitude/latitude, and ocean/mountain/river style), `markerAnchors` (marker ID to pixel anchor), `caption`, `period`, `disclaimer`, `routeNote`, and `regionNote`. Optional `collections: [Read, Hike]` controls which article lists include the project; otherwise `category` supplies the collection.
 - `timeline.yaml`: dated events, each with a unique ID, a marker ID, summary, and source URL. Multiple events can refer to one place. Events are sorted by date during the build.
 - `map/markers.csv`: longitude/latitude in WGS84 decimal degrees, a unique marker ID, and the basename of its Markdown card. Quoted CSV fields can contain commas.
-- `map/routes/`: GeoJSON LineStrings. `properties` include a unique `id`, `kind: route`, `title`, hex `color`, description, and source.
+- `map/routes/`: GeoJSON LineStrings. `properties` include a unique `id`, `kind: route`, `title`, hex `color`, description, and source. Optional `legend_label` supplies a short legend name; otherwise the route title is used. `legend_order` sets display order. Legend colors come from route colors.
 - `map/regions/`: GeoJSON Polygons with closed rings; use `kind: region`.
 - `cards/` and `notes.md`: Markdown, with local image paths relative to the project root, such as `assets/images/fort-clatsop.jpg`. HTML is sanitized. Raw scripts and unsafe URLs are removed. Image files must exist.
 
@@ -111,3 +114,7 @@ The supplied Natural Earth datasets are public domain and represent **generalize
 ## GitHub Pages
 
 The existing workflow installs dependencies, builds and validates content, bundles the renderer, and packages `index.html`, the `read/`, `hike/`, and `about/` page entries, `generated/`, and project runtime assets. Source shapefiles and `node_modules` are excluded from the deployed artifact. Paths are relative, so the site supports repository subpaths on GitHub Pages. Deployment occurs on a push to `main` or manual workflow dispatch; this implementation does not push or deploy automatically.
+
+## Renderer boundaries
+
+`map-view.js` owns Leaflet behavior and shared visual defaults (control placement, zoom limits, marker sizes, route strokes, and five-degree grid spacing). It consumes the basemap's land/lakes/rivers layer contract. Geographic labels, source attribution, marker-specific pixel anchors, and project caveats belong to authored content. Grid bounds are derived from the project's map extent; there are no expedition IDs or named geographic labels in the map renderer.

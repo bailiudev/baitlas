@@ -3,6 +3,8 @@
   "properties": {
     "id": "upper-missouri",
     "kind": "route",
+    "legend_order": 2,
+    "legend_label": "Continental divide",
     "title": "Toward the divide",
     "color": "#bd8a3d",
     "period": "1805",

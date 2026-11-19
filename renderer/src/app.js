@@ -12,7 +12,7 @@ for(const link of document.querySelectorAll('[data-page-link]')) {
 try {
   if(location.protocol==='file:')throw new Error('Serve this atlas over HTTP: python3 -m http.server 8000, then open http://localhost:8000.');
   if(page==='about') {
-    renderAbout(main);document.title='About · Baitlas';
+    renderAbout(main,await fetchData('generated/about.html',true));document.title='About · Baitlas';
   } else {
     const catalog=await fetchData('generated/projects.json');
     // Keep links shared by the first MVP working.

@@ -177,6 +177,8 @@
       "properties": {
         "id": "missouri",
         "kind": "route",
+        "legend_order": 1,
+        "legend_label": "Missouri",
         "title": "Up the Missouri",
         "color": "#ae6746",
         "period": "1804",
@@ -267,6 +269,8 @@
       "properties": {
         "id": "pacific",
         "kind": "route",
+        "legend_order": 3,
+        "legend_label": "Pacific",
         "title": "Across to the Pacific",
         "color": "#3e7776",
         "period": "1805",
@@ -377,6 +381,8 @@
       "properties": {
         "id": "upper-missouri",
         "kind": "route",
+        "legend_order": 2,
+        "legend_label": "Continental divide",
         "title": "Toward the divide",
         "color": "#bd8a3d",
         "period": "1805",

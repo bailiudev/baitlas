@@ -3,6 +3,8 @@
   "properties": {
     "id": "pacific",
     "kind": "route",
+    "legend_order": 3,
+    "legend_label": "Pacific",
     "title": "Across to the Pacific",
     "color": "#3e7776",
     "period": "1805",

@@ -12,6 +12,64 @@
   "map": {
     "basemap": "content/projects/lewis_and_clark_expedition/assets/maps/basemap.geojson",
     "style": "content/projects/lewis_and_clark_expedition/assets/maps/style.json",
+    "caption": "THE WESTWARD PASSAGE",
+    "period": "1804 — 1805",
+    "disclaimer": "Dashed routes and markers are approximate. Regions are editorial focus areas.",
+    "attribution": {
+      "title": "Natural Earth",
+      "url": "https://www.naturalearthdata.com/",
+      "note": "modern geography"
+    },
+    "labels": [
+      {
+        "text": "PACIFIC\nOCEAN",
+        "coordinates": [
+          -126.8,
+          43.8
+        ],
+        "kind": "ocean"
+      },
+      {
+        "text": "ROCKY MOUNTAINS",
+        "coordinates": [
+          -113.5,
+          43.5
+        ],
+        "kind": "mountain"
+      },
+      {
+        "text": "MISSOURI RIVER",
+        "coordinates": [
+          -102,
+          44.8
+        ],
+        "kind": "river"
+      },
+      {
+        "text": "COLUMBIA RIVER",
+        "coordinates": [
+          -120,
+          44.8
+        ],
+        "kind": "river"
+      }
+    ],
+    "markerAnchors": {
+      "st-louis": [
+        -14,
+        14
+      ],
+      "chinook-point": [
+        14,
+        30
+      ],
+      "fort-clatsop": [
+        14,
+        -2
+      ]
+    },
+    "routeNote": "Schematic outbound route",
+    "regionNote": "Editorial focus area · approximate",
     "bounds": [
       [
         -125,

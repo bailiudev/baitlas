@@ -8,6 +8,7 @@ const content=path.join(root,'content/projects');
 const generated=path.join(root,'generated');
 const read=p=>readFile(p,'utf8');
 const json=p=>read(p).then(JSON.parse);
+const about=markdown(await read(path.join(root,'content/about.md')));
 const output=[];
 for(const entry of (await readdir(content,{withFileTypes:true})).sort((a,b)=>a.name.localeCompare(b.name))) {
   if(!entry.isDirectory()) continue;
@@ -41,6 +42,7 @@ for(const entry of (await readdir(content,{withFileTypes:true})).sort((a,b)=>a.n
 }
 // Validate every project before replacing generated content.
 await mkdir(generated,{recursive:true});
+await writeFile(path.join(generated,'about.html'),about);
 for(const item of output) {
   const dest=path.join(generated,'projects',item.id);await mkdir(dest,{recursive:true});
   for(const [name,value] of Object.entries({'project.json':item.project,'timeline.json':item.timeline,'features.geojson':item.features,'cards.json':item.cards,'notes.html':item.notes})) {

@@ -18,6 +18,7 @@ export function markdown(text, id) {
       a: (tag,attrs)=>({tagName:tag,attribs:{...attrs,rel:'noopener noreferrer'}}),
       img: (tag,attrs)=> {
         // Author paths are relative to the project's root. Keep the entire runtime local.
+        if(!id) throw new Error('Images require a project asset directory');
         if(!/^assets\/images\/[a-zA-Z0-9_./-]+$/.test(attrs.src||'') || attrs.src.split('/').includes('..')) throw new Error(`Image must be inside assets/images: ${attrs.src}`);
         return {tagName:tag,attribs:{...attrs,src:`content/projects/${id}/${attrs.src}`,loading:'lazy'}};
       }

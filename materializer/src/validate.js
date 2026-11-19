@@ -19,6 +19,7 @@ export function coordinate(c) {
 }
 export function validateContent(project, timeline, features, cards) {
   validateSchema(project,timeline);
+  for(const label of project.map.labels||[])coordinate(label.coordinates);
   const ids=new Set();
   for (const f of features) {
     if(f.type!=='Feature' || !f.properties || !/^[a-z0-9_-]+$/.test(f.properties.id)) throw new Error('Invalid feature identity');
@@ -33,6 +34,9 @@ export function validateContent(project, timeline, features, cards) {
     } else {
       if(!/^#[0-9a-f]{6}$/i.test(f.properties.color)) throw new Error(`Invalid color for ${id}`);
       if(kind==='route') {
+        const {legend_label,legend_order}=f.properties;
+        if(legend_label!==undefined && (typeof legend_label!=='string' || !legend_label.trim())) throw new Error(`Invalid route legend label: ${id}`);
+        if(legend_order!==undefined && (!Number.isInteger(legend_order) || legend_order<0)) throw new Error(`Invalid route legend order: ${id}`);
         if(g.type!=='LineString' || g.coordinates.length<2) throw new Error(`Invalid route ${id}`);
         g.coordinates.forEach(coordinate);
       } else {
@@ -45,6 +49,7 @@ export function validateContent(project, timeline, features, cards) {
     }
   }
   const markers=new Set(features.filter(f=>f.properties.kind==='marker').map(f=>f.properties.id));
+  for(const id of Object.keys(project.map.markerAnchors||{}))if(!markers.has(id))throw new Error(`Unknown marker anchor: ${id}`);
   const eventIds=new Set();
   for(const e of timeline.events) {
     if(eventIds.has(e.id)) throw new Error(`Duplicate event: ${e.id}`); eventIds.add(e.id);

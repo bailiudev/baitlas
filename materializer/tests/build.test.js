@@ -30,3 +30,22 @@ test('basemap contains all three supplied layers and local photo exists',async()
  assert.deepEqual([...new Set(base.features.map(f=>f.properties.kind))].sort(),['lakes','land','rivers']);
  assert.ok((await readFile(new URL('content/projects/lewis_and_clark_expedition/assets/images/fort-clatsop.jpg',root))).length>1000);
 });
+
+test('map annotations validate coordinates, kinds, and marker references',async()=>{
+ const a=await fixture();a[0].map.labels[0].coordinates=[181,40];
+ assert.throws(()=>validateContent(...a),/Invalid coordinate/);
+ const b=await fixture();b[0].map.markerAnchors.missing=[14,14];
+ assert.throws(()=>validateContent(...b),/Unknown marker anchor/);
+ const c=await fixture();c[0].map.labels[0].kind='invalid';
+ assert.throws(()=>validateContent(...c),/project.yaml/);
+ const d=await fixture();delete d[0].map.labels;delete d[0].map.markerAnchors;delete d[0].map.attribution;
+ assert.doesNotThrow(()=>validateContent(...d));
+});
+test('About is materialized from sanitized Markdown with site-relative links',async()=>{
+ const source=await readFile(new URL('content/about.md',root),'utf8');
+ const result=await readFile(new URL('generated/about.html',root),'utf8');
+ assert.equal(result,markdown(source));
+ assert.match(result,/<h1>/);assert.match(result,/href="read\/"/);
+ assert.ok(!markdown('<script>alert(1)</script>\n[bad](javascript:alert(1))').includes('javascript:'));
+ assert.throws(()=>markdown('![Photo](assets/images/photo.jpg)'),/project asset directory/);
+});

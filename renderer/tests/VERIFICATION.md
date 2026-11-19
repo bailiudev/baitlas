@@ -22,3 +22,10 @@ To run the separate suite, install Chromium with `npx playwright install chromiu
 ## Scope
 
 The expedition appears in both Read and Hike for this MVP, with a historical-route-study label in Hike. The existing schematic route and modern-geography limitations are unchanged. No public deployment, commit, or push was performed for these refinements.
+
+## Content separation follow-up
+
+- About now builds from `content/about.md` into sanitized `generated/about.html` and is fetched by the About renderer.
+- Map annotations, attribution, marker anchors, captions, and caveats come from project metadata. Route features supply legend labels/colors; the coordinate grid uses the map extent.
+- Both builds and all nine materializer tests passed, including invalid annotation coordinates, unknown marker anchors, unsupported label kinds, optional map annotations, and About compilation/sanitization.
+- In-app browser: nine map markers, four geographic labels, route legend, attribution, and Great Falls timeline/card selection verified after rebuilding. About copy, headings, and collection links rendered from generated content. Standalone Playwright was not rerun; its previously documented missing-Chromium limitation remains.
