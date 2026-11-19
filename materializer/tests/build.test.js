@@ -45,7 +45,7 @@ test('About is materialized from sanitized Markdown with site-relative links',as
  const source=await readFile(new URL('content/about.md',root),'utf8');
  const result=await readFile(new URL('generated/about.html',root),'utf8');
  assert.equal(result,markdown(source));
- assert.match(result,/<h1>/);assert.match(result,/href="read\/"/);
+ assert.match(result,/<h1>/);assert.match(result,/href="\?page=read"/);
  assert.ok(!markdown('<script>alert(1)</script>\n[bad](javascript:alert(1))').includes('javascript:'));
  assert.throws(()=>markdown('![Photo](assets/images/photo.jpg)'),/project asset directory/);
 });

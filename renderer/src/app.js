@@ -3,8 +3,9 @@ import {fetchData,loadProject,escapeHTML as h} from './project-loader.js';
 import {renderProject} from './project-view.js';
 import {renderHome,renderCollection,renderAbout,inCollection,projectURL} from './pages-view.js';
 const main=document.querySelector('#main');
-const page=document.body.dataset.page||'home';
-const projectId=new URLSearchParams(location.search).get('project');
+const params=new URLSearchParams(location.search);
+const page=['read','hike','about'].includes(params.get('page'))?params.get('page'):'home';
+const projectId=params.get('project');
 document.querySelector('.skip-link').href=`${location.pathname}${location.search}#main`;
 for(const link of document.querySelectorAll('[data-page-link]')) {
   if(link.dataset.pageLink===page){link.classList.add('active');link.setAttribute('aria-current','page');}
@@ -33,5 +34,5 @@ try {
     } else renderHome(main,catalog);
   }
 } catch(error) {
-  main.innerHTML=`<section class="error-state" role="alert"><p class="eyebrow">A SMALL DETOUR</p><h1>Let’s find our way back.</h1><p>${h(error.message)}</p><a class="underlined-link" href="${page==='hike'?'hike/':'read/'}">Back to the collection ↗</a></section>`;
+  main.innerHTML=`<section class="error-state" role="alert"><p class="eyebrow">A SMALL DETOUR</p><h1>Let’s find our way back.</h1><p>${h(error.message)}</p><a class="underlined-link" href="?page=${page==='hike'?'hike':'read'}">Back to the collection ↗</a></section>`;
 }

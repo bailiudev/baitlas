@@ -37,8 +37,8 @@ jobs:
       - name: Package runtime assets
         run: |
           mkdir -p _site/content/projects
-          cp index.html _site/
-          cp -R generated read hike about _site/
+          cp index.html 404.html _site/
+          cp -R generated _site/
           for project in content/projects/*; do
             if [ -d "$project/assets" ]; then
               mkdir -p "_site/$project"

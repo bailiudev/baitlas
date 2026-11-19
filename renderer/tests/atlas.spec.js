@@ -1,5 +1,5 @@
 import {test,expect} from '@playwright/test';
-const project='/read/?project=lewis_and_clark_expedition';
+const project='/?page=read&project=lewis_and_clark_expedition';
 
 test('homepage, independent collections, and About have working navigation',async({page})=>{
  await page.goto('/');
@@ -8,14 +8,14 @@ test('homepage, independent collections, and About have working navigation',asyn
  await expect(page.locator('#map')).toHaveCount(0);
  for(const collection of ['Read','Hike']) {
   await page.getByRole('link',{name:collection,exact:true}).click();
-  await expect(page).toHaveURL(new RegExp(`/${collection.toLowerCase()}/$`));
+  await expect(page).toHaveURL(`/?page=${collection.toLowerCase()}`);
   await expect(page.locator('.article-row')).toHaveCount(1);
   await page.locator('.article-row').click();
   await expect(page.locator('.project-heading h1')).toHaveText('Lewis & Clark Expedition');
   if(collection==='Hike')await expect(page.locator('.mode-notice')).toBeVisible();
  }
  await page.getByRole('link',{name:'About',exact:true}).click();
- await expect(page).toHaveURL('/about/');
+ await expect(page).toHaveURL('/?page=about');
  await expect(page.locator('h1')).toContainText('Every story');
  await expect(page.locator('#map')).toHaveCount(0);
  await page.getByRole('link',{name:'Baitlas home',exact:true}).click();
@@ -80,7 +80,7 @@ test('new and legacy event links and missing-project recovery work',async({page}
   await expect(page.locator('#place-card h1')).toHaveText('Fort Clatsop');
   await expect(page).toHaveURL(`${project}#event=leave-clatsop`);
  }
- await page.goto('/read/?project=missing-project');
+ await page.goto('/?page=read&project=missing-project');
  await expect(page.getByRole('alert')).toContainText('This article could not be found');
  await page.getByRole('link',{name:'Back to the collection'}).click();
  await expect(page.locator('.article-row')).toHaveCount(1);

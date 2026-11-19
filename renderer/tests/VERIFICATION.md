@@ -1,31 +1,13 @@
-# Page refinement verification — 2026-11-17
+# MVP verification — 2026-11-18
 
-## Executed
-
-- Materializer and renderer builds passed. Output includes the homepage, physical Read/Hike/About entry pages, catalog, 11 events, 15 map features, 9 cards, and notes.
-- All seven Node materializer tests passed.
-- In-app browser checks covered desktop and mobile layouts: homepage highlights; independent Read/Hike lists; opening the expedition from each collection; standalone About; correct active navigation; missing-project recovery.
-- The map and timeline are sibling sections, with visible spacing between them. All 9 markers and 11 timeline events render. Great Falls selects moment 5/11 and the matching card; Next opens Lemhi Pass. View on map scrolls back to the map. Keyboard activation of St. Louis selects moment 11/11 and disables Next.
-- Desktop notes have a left section menu and right article. Mobile notes stack the menu above the article. Five section links and ten references render. References are below the article; citation links preserve the original linked words and direct readers to the numbered reference.
-- Section links preserve the project query and work after reload. Reference navigation moves keyboard focus to its target. New event URLs and legacy MVP links open the intended Fort Clatsop return event.
-- No document horizontal overflow observed on desktop or mobile, including the 390-pixel homepage and narrower article viewports. No browser console warnings/errors observed.
-- The staged deployment at `/_site/read/?project=lewis_and_clark_expedition` renders all markers and events, loads the local photograph, and preserves the deployment prefix in navigation, section links, and assets.
-- Current screenshots: `screenshots/home-desktop.png`, `screenshots/home-mobile.png`, and `screenshots/notes-mobile.png`. Other existing screenshots document the original MVP.
+- Materializer and renderer builds passed. One root `index.html` serves Home, Read, Hike, About, and project articles using query parameters. The renderer no longer creates `read/`, `hike/`, or `about/`.
+- All nine Node materializer tests passed. They cover content validation, map annotations, sanitized About Markdown, and local assets.
+- In-app browser checks confirmed Read, Hike, and About query routes; one expedition article in each collection; 9 map markers and 11 timeline events; Great Falls event/card selection; 10 references; a direct notes link; and the first MVP's hash redirect.
+- The staged repository subpath `/_site/?page=read&project=lewis_and_clark_expedition` rendered all 9 markers and loaded project data. `/_site/?page=about` rendered the About article without console errors.
+- The root `404.html` script was checked against old Read, Hike, and About URLs under a repository subpath. It retained project query parameters and event hashes while redirecting to the single-entry URL. GitHub Pages uses this file for old deployed directory links; Python's local preview server does not.
+- The desktop/mobile layout checks for the map, independent timeline, and notes were completed before the routing change. This change preserves their markup and styles.
 - `git diff --check` passed.
 
-## Standalone browser suite
+The updated desktop/mobile Playwright suite passed a syntax check. It was not executed because the local Playwright Chromium executable is absent. The interactions above were checked in the Codex in-app browser. To run the separate suite, install Chromium with `npx playwright install chromium` inside `renderer/`, then run `npm test`.
 
-`atlas.spec.js` was updated for the new navigation, independent timeline, article anchors, references, deep links, and keyboard interaction, with desktop/mobile projects. Its syntax check passed. The runner could not execute browser assertions because its Chromium executable is not installed. A sandboxed attempt also could not access the preview server; an approved retry reached the runner and confirmed the missing executable. The interactions above were verified using the in-app browser instead.
-
-To run the separate suite, install Chromium with `npx playwright install chromium` in `renderer/`, then run `npm test`.
-
-## Scope
-
-The expedition appears in both Read and Hike for this MVP, with a historical-route-study label in Hike. The existing schematic route and modern-geography limitations are unchanged. No public deployment, commit, or push was performed for these refinements.
-
-## Content separation follow-up
-
-- About now builds from `content/about.md` into sanitized `generated/about.html` and is fetched by the About renderer.
-- Map annotations, attribution, marker anchors, captions, and caveats come from project metadata. Route features supply legend labels/colors; the coordinate grid uses the map extent.
-- Both builds and all nine materializer tests passed, including invalid annotation coordinates, unknown marker anchors, unsupported label kinds, optional map annotations, and About compilation/sanitization.
-- In-app browser: nine map markers, four geographic labels, route legend, attribution, and Great Falls timeline/card selection verified after rebuilding. About copy, headings, and collection links rendered from generated content. Standalone Playwright was not rerun; its previously documented missing-Chromium limitation remains.
+The expedition remains a historical route study with schematic routes and generalized modern geography. No commit or push was performed for this routing change.

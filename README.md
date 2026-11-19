@@ -11,7 +11,7 @@ cd /Users/bailiu/Documents/Baitlas/repo
 python3 -m http.server 8000 --bind 127.0.0.1
 ```
 
-Open **http://127.0.0.1:8000** for the highlights homepage. Read, Hike, and About have separate pages; the two collections link to project articles. Use an HTTP server; double-clicking `index.html` (`file://`) cannot load the JSON assets in browsers.
+Open **http://127.0.0.1:8000** for the highlights homepage. Read, Hike, and About are separate views served by one `index.html`; the two collections link to project articles. Use an HTTP server; double-clicking `index.html` (`file://`) cannot load the JSON assets in browsers.
 
 The map uses locally bundled Leaflet, Natural Earth geography, and local media. No API key, CDN, tile server, or network request is needed at runtime. Source links open the original references when clicked.
 
@@ -51,9 +51,8 @@ npm test
 
 ```text
 .github/workflows/deploy.yml
-index.html                          Highlights homepage
-read/index.html, hike/index.html   Article collections and project entries
-about/index.html                  About page
+index.html                          Shared entry for Home, Read, Hike, About, and articles
+404.html                            Redirects earlier collection URLs on GitHub Pages
 materializer/
   package.json, package-lock.json
   src/build.js, validate.js, prepare-maps.js, parsers/content.js
@@ -83,11 +82,11 @@ generated/
     project.json, features.geojson, timeline.json, cards.json, notes.html
 ```
 
-The necessary map-format deviation is **GeoJSON instead of PMTiles**: the provided map sources were Natural Earth shapefiles. `prepare-maps.js` clips and simplifies those local sources into one small regional vector file. `style.json` contains Leaflet path styles. No glyph fonts or sprite directories are needed because Leaflet draws these vector paths and markers directly. The additional build/configuration scripts make the authored/generated separation reproducible. The renderer build also creates three small HTML entries (`read/`, `hike/`, and `about/`) from the shared root shell, so static hosting needs no URL rewrites. Edit the shell in `index.html` and rebuild to update them.
+The necessary map-format deviation is **GeoJSON instead of PMTiles**: the provided map sources were Natural Earth shapefiles. `prepare-maps.js` clips and simplifies those local sources into one small regional vector file. `style.json` contains Leaflet path styles. No glyph fonts or sprite directories are needed because Leaflet draws these vector paths and markers directly. The additional build/configuration scripts make the authored/generated separation reproducible. The renderer uses `index.html` for every view. The `page` and optional `project` query parameters select the content without server rewrites. `404.html` redirects earlier directory URLs on GitHub Pages. Edit the shell in `index.html` and rebuild the renderer for code or style changes.
 
 ## Author content
 
-- `content/about.md`: all About copy. Use an introductory eyebrow paragraph, one H1, then the lead paragraph and article sections. The renderer supplies layout and typography. The materializer sanitizes this into `generated/about.html`; rebuild the materializer after copy edits. About links such as `read/` resolve from the site root, including on repository subpaths.
+- `content/about.md`: all About copy. Use an introductory eyebrow paragraph, one H1, then the lead paragraph and article sections. The renderer supplies layout and typography. The materializer sanitizes this into `generated/about.html`; rebuild the materializer after copy edits. About links such as `?page=read` resolve from the site root, including on repository subpaths.
 - `project.yaml`: title, descriptive metadata, basemap paths, visible bounds, and source list. Its `id` must match its folder name. Optional map presentation fields include `attribution`, `labels` (text, WGS84 longitude/latitude, and ocean/mountain/river style), `markerAnchors` (marker ID to pixel anchor), `caption`, `period`, `disclaimer`, `routeNote`, and `regionNote`. Optional `collections: [Read, Hike]` controls which article lists include the project; otherwise `category` supplies the collection.
 - `timeline.yaml`: dated events, each with a unique ID, a marker ID, summary, and source URL. Multiple events can refer to one place. Events are sorted by date during the build.
 - `map/markers.csv`: longitude/latitude in WGS84 decimal degrees, a unique marker ID, and the basename of its Markdown card. Quoted CSV fields can contain commas.
@@ -103,7 +102,7 @@ Select a timeline event or numbered place to open its card and center the map. C
 
 Read and Hike are independent article collections. The sample expedition appears in both; Hike labels it as a historical route study. About is a separate page. Each project has a full-width map, a separate horizontal timeline below it, and an article with a left-hand section menu. References appear at the bottom of the article. On small screens the section menu stacks above the text.
 
-Selected events have reloadable URLs, e.g. `read/?project=lewis_and_clark_expedition#event=leave-clatsop`. Section and numbered reference links preserve the current project. Links shared by the first MVP (`#lewis_and_clark_expedition/leave-clatsop`) redirect to the new article URL.
+Selected events have reloadable URLs, e.g. `?page=read&project=lewis_and_clark_expedition#event=leave-clatsop`. Section and numbered reference links preserve the current project. Links shared by the first MVP (`#lewis_and_clark_expedition/leave-clatsop`) redirect to the new article URL.
 
 ## Historical scope and provenance
 
@@ -113,7 +112,7 @@ The supplied Natural Earth datasets are public domain and represent **generalize
 
 ## GitHub Pages
 
-The existing workflow installs dependencies, builds and validates content, bundles the renderer, and packages `index.html`, the `read/`, `hike/`, and `about/` page entries, `generated/`, and project runtime assets. Source shapefiles and `node_modules` are excluded from the deployed artifact. Paths are relative, so the site supports repository subpaths on GitHub Pages. Deployment occurs on a push to `main` or manual workflow dispatch; this implementation does not push or deploy automatically.
+The existing workflow installs dependencies, builds and validates content, bundles the renderer, and packages `index.html`, `404.html`, `generated/`, and project runtime assets. Source shapefiles and `node_modules` are excluded from the deployed artifact. Paths are relative, so the site supports repository subpaths on GitHub Pages. Deployment occurs on a push to `main` or manual workflow dispatch; this implementation does not push or deploy automatically.
 
 ## Renderer boundaries
 
