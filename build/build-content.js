@@ -1,9 +1,9 @@
 import {readFile,writeFile,readdir,mkdir,access} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {yaml,mapFeatures,markdown} from './parsers/content.js';
+import {yaml,mapFeatures,markdown} from './content.js';
 import {validateContent} from './validate.js';
-const root=fileURLToPath(new URL('../../',import.meta.url));
+const root=fileURLToPath(new URL('../',import.meta.url));
 const content=path.join(root,'content/projects');
 const generated=path.join(root,'generated');
 const read=p=>readFile(p,'utf8');

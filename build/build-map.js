@@ -5,7 +5,7 @@ import {simplify} from '@turf/simplify';
 import {mkdir, writeFile} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
 import path from 'node:path';
-const root = fileURLToPath(new URL('../../', import.meta.url));
+const root = fileURLToPath(new URL('../', import.meta.url));
 const bounds = [-145, 10, -65, 70];
 const sets = {land:'ne_10m_land', lakes:'ne_10m_lakes', rivers:'ne_10m_rivers_lake_centerlines'};
 const features = [];

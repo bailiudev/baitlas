@@ -20,31 +20,29 @@ The map uses locally bundled Leaflet, Natural Earth geography, and local media. 
 Requires Node.js 20+ and npm. Run from the repository root:
 
 ```sh
-npm ci --prefix materializer
-npm ci --prefix renderer
-npm run build --prefix materializer
-npm run build --prefix renderer
+npm ci --prefix build
+npm run build --prefix build
 ```
 
 To reproduce the basemap from the preserved shapefiles (only needed when changing the map extent or simplification):
 
 ```sh
-npm run maps --prefix materializer
-npm run build --prefix materializer
+npm run build:map --prefix build
+npm run build --prefix build
 ```
 
 To validate content:
 
 ```sh
-npm test --prefix materializer
+npm test --prefix build
 ```
 
 An optional Playwright smoke suite covers desktop and mobile interactions:
 
 ```sh
-cd renderer
+cd build
 npx playwright install chromium
-npm test
+npm run test:browser
 ```
 
 ## File structure
@@ -52,16 +50,12 @@ npm test
 ```text
 .github/workflows/deploy.yml
 index.html                          Shared entry for Home, Read, Hike, About, and articles
-materializer/
-  package.json, package-lock.json
-  src/build.js, validate.js, prepare-maps.js, parsers/content.js
-  schemas/
-  tests/
-renderer/
-  package.json, package-lock.json, build.js, playwright.config.js
-  src/app.js, pages-view.js, project-loader.js, project-view.js, map-view.js
-  src/timeline-view.js, card-view.js, notes-view.js, styles.css
-  tests/
+build/
+  package.json, package-lock.json, playwright.config.js
+  build-content.js, build-map.js, build-app.js, content.js, validate.js
+  app.js, pages-view.js, project-loader.js, project-view.js, map-view.js
+  timeline-view.js, card-view.js, notes-view.js, styles.css
+  schemas/, tests/
 content/
   about.md                         Site About copy
   shared/maps/                      Original supplied Natural Earth datasets
@@ -72,28 +66,28 @@ content/
     assets/maps/basemap.geojson, style.json, README.md
     assets/images/fort-clatsop.jpg, README.md
 generated/
-  renderer/                        Bundled browser JavaScript, CSS, Leaflet assets/license
+  app/                             Bundled browser JavaScript, CSS, and Leaflet license
   about.html                       Sanitized About content
   projects.json
   projects/lewis_and_clark_expedition/
     project.json, map.json, features.geojson, timeline.json, cards.json, notes.html
 ```
 
-The necessary basemap-format deviation is **GeoJSON instead of PMTiles**: the provided map sources were Natural Earth shapefiles. `prepare-maps.js` clips and simplifies those local sources into one small regional vector file. Authored points, labels, routes, and regions use YAML; the materializer converts them to `generated/.../features.geojson` for the renderer. `style.json` contains Leaflet path styles. Leaflet's default PNG marker and layer-control icons are unused; the renderer build omits them. No glyph fonts or sprite directories are needed because Leaflet draws these vector paths and markers directly. The additional build/configuration scripts make the authored/generated separation reproducible. The renderer uses `index.html` for every view. The `page` and optional `project` query parameters select the content without server rewrites. Edit the shell in `index.html` and rebuild the renderer for code or style changes.
+The necessary basemap-format deviation is **GeoJSON instead of PMTiles**: the provided map sources were Natural Earth shapefiles. `build-map.js` clips and simplifies those local sources into one small regional vector file. Authored points, labels, routes, and regions use YAML; `build-content.js` converts them to `generated/.../features.geojson` for the browser app. `style.json` contains Leaflet path styles. Leaflet's default PNG marker and layer-control icons are unused; `build-app.js` omits them. No glyph fonts or sprite directories are needed because Leaflet draws these vector paths and markers directly. The build scripts keep authored content separate from generated output. The browser app uses `index.html` for every view. The `page` and optional `project` query parameters select the content without server rewrites. Edit the shell in `index.html` and run `npm run build --prefix build` for code or style changes.
 
 ## Author content
 
-- `content/about.md`: all About copy. Use an introductory eyebrow paragraph, one H1, then the lead paragraph and article sections. The renderer supplies layout and typography. The materializer sanitizes this into `generated/about.html`; rebuild the materializer after copy edits. About links such as `?page=read` resolve from the site root, including on repository subpaths.
+- `content/about.md`: all About copy. Use an introductory eyebrow paragraph, one H1, then the lead paragraph and article sections. The browser app supplies layout and typography. `build-content.js` sanitizes this into `generated/about.html`; rebuild after copy edits. About links such as `?page=read` resolve from the site root, including on repository subpaths.
 - `project.yaml`: title, descriptive metadata, and source list. Its `id` must match its folder name. Optional `collections: [Read, Hike]` controls which article lists include the project; otherwise `category` supplies the collection.
 - `map/config.yaml`: basemap and style paths, visible bounds, and map presentation fields such as attribution, marker pixel anchors, caption, period, disclaimer, and route/region notes.
 - `timeline.yaml`: dated events, each with a unique ID, a marker ID, summary, and source URL. Multiple events can refer to one place. Events are sorted by date during the build.
 - `map/points.yaml`: `markers` with unique IDs, WGS84 `[longitude, latitude]` coordinates, and Markdown card names. These are the selectable locations for timeline events and information cards.
 - `map/labels.yaml`: `labels` with text, coordinates, and an ocean/mountain/river style.
 - `map/routes.yaml`: route metadata and ordered `path` coordinates, each `[longitude, latitude]`. Routes are independent of the points used for cards. Optional `legend_label` and `legend_order` control the legend.
-- `map/regions.yaml`: region metadata and `boundary` coordinates, each `[longitude, latitude]`. Regions are independent of card points. The materializer closes each polygon automatically.
+- `map/regions.yaml`: region metadata and `boundary` coordinates, each `[longitude, latitude]`. Regions are independent of card points. The content build closes each polygon automatically.
 - `cards/` and `notes.md`: Markdown, with local image paths relative to the project root, such as `assets/images/fort-clatsop.jpg`. HTML is sanitized. Raw scripts and unsafe URLs are removed. Image files must exist.
 
-The materializer checks schemas, coordinates, real calendar dates, duplicate IDs, marker/card references, region boundaries, and required assets before emitting generated files. Rebuild the materializer after editing authored map content. Serve the repository root, since generated metadata references project assets in `content/`.
+The content build checks schemas, coordinates, real calendar dates, duplicate IDs, marker/card references, region boundaries, and required assets before emitting generated files. Rebuild after editing authored map content. Serve the repository root, since generated metadata references project assets in `content/`.
 
 ## Interaction
 
@@ -111,8 +105,8 @@ The supplied Natural Earth datasets are public domain and represent **generalize
 
 ## GitHub Pages
 
-The existing workflow installs dependencies, builds and validates content, bundles the renderer, and packages `index.html`, `generated/`, and project runtime assets. Source shapefiles and `node_modules` are excluded from the deployed artifact. Paths are relative, so the site supports repository subpaths on GitHub Pages. Deployment occurs on a push to `main` or manual workflow dispatch.
+The existing workflow installs one set of dependencies, builds and validates content and browser assets, then packages `index.html`, `generated/`, and project runtime assets. Source shapefiles and `node_modules` are excluded from the deployed artifact. Paths are relative, so the site supports repository subpaths on GitHub Pages. Deployment occurs on a push to `main` or manual workflow dispatch.
 
-## Renderer boundaries
+## Map behavior
 
-`map-view.js` owns Leaflet behavior and shared visual defaults (control placement, zoom limits, marker sizes, route strokes, and five-degree grid spacing). It consumes the basemap's land/lakes/rivers layer contract. Geographic labels, source attribution, marker-specific pixel anchors, and project caveats belong to authored content. Grid bounds are derived from the project's map extent; there are no expedition IDs or named geographic labels in the map renderer.
+`map-view.js` owns Leaflet behavior and shared visual defaults (control placement, zoom limits, marker sizes, route strokes, and five-degree grid spacing). It consumes the basemap's land/lakes/rivers layer contract. Geographic labels, source attribution, marker-specific pixel anchors, and project caveats belong to authored content. Grid bounds are derived from the project's map extent; there are no expedition IDs or named geographic labels in the browser map code.

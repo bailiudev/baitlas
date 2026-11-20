@@ -1,7 +1,7 @@
 import Ajv from 'ajv';
 import {readFileSync} from 'node:fs';
 const ajv = new Ajv({allErrors:true});
-const schema = name => JSON.parse(readFileSync(new URL(`../schemas/${name}.schema.json`, import.meta.url)));
+const schema = name => JSON.parse(readFileSync(new URL(`./schemas/${name}.schema.json`, import.meta.url)));
 const projectSchema = ajv.compile(schema('project'));
 const mapSchema = ajv.compile(schema('map'));
 const timelineSchema = ajv.compile(schema('timeline'));

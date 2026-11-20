@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {validateContent} from '../src/validate.js';
-import {markdown,mapFeatures,yaml} from '../src/parsers/content.js';
+import {validateContent} from '../validate.js';
+import {markdown,mapFeatures,yaml} from '../content.js';
 const root=new URL('../../',import.meta.url);
 const json=async p=>JSON.parse(await readFile(new URL(p,root),'utf8'));
 async function fixture(){
