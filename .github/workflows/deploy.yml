@@ -22,29 +22,25 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: build/package-lock.json
+          cache-dependency-path: src/package-lock.json
       - name: Install dependencies
         run: |
-          npm ci --prefix build
+          npm ci --prefix src
       - name: Build and validate
         run: |
-          npm run build --prefix build
-          npm test --prefix build
-      - name: Package runtime assets
+          npm run build --prefix src
+          npm test --prefix src
+      - name: Install browser for smoke tests
+        working-directory: src
         run: |
-          mkdir -p _site/content/projects
-          cp index.html _site/
-          cp -R generated _site/
-          for project in content/projects/*; do
-            if [ -d "$project/assets" ]; then
-              mkdir -p "_site/$project"
-              cp -R "$project/assets" "_site/$project/"
-            fi
-          done
+          npx playwright install --with-deps chromium
+      - name: Test deployable site in browser
+        run: |
+          npm run test:browser --prefix src
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:
-          path: _site
+          path: dist
       - name: Deploy website
         id: deployment
         uses: actions/deploy-pages@v4

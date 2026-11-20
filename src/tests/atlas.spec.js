@@ -27,7 +27,7 @@ test('independent timeline below map synchronizes cards and layers',async({page}
  const errors=[],failed=[],remote=[];
  page.on('pageerror',e=>errors.push(e.message));
  page.on('response',r=>{if(r.status()>=400)failed.push(r.url());});
- page.on('request',r=>{if(!r.url().startsWith('http://127.0.0.1:8000'))remote.push(r.url());});
+ page.on('request',r=>{if(!r.url().startsWith('http://127.0.0.1:4173'))remote.push(r.url());});
  await page.goto(project);
  await expect(page.locator('.place-marker')).toHaveCount(9);
  await expect(page.locator('.geographic-label')).toHaveCount(4);

@@ -1,14 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {validateContent} from '../validate.js';
-import {markdown,mapFeatures,yaml} from '../content.js';
+import {validateContent} from '../build/validate.js';
+import {markdown,mapFeatures,yaml} from '../build/content.js';
 const root=new URL('../../',import.meta.url);
 const json=async p=>JSON.parse(await readFile(new URL(p,root),'utf8'));
 async function fixture(){
- const base='generated/projects/lewis_and_clark_expedition/';
- const project=yaml(await readFile(new URL('content/projects/lewis_and_clark_expedition/project.yaml',root),'utf8'));
- const map=yaml(await readFile(new URL('content/projects/lewis_and_clark_expedition/map/config.yaml',root),'utf8'));
+ const base='dist/projects/lewis_and_clark_expedition/';
+ const project=yaml(await readFile(new URL('data/projects/lewis_and_clark_expedition/project.yaml',root),'utf8'));
+ const map=yaml(await readFile(new URL('data/projects/lewis_and_clark_expedition/map/config.yaml',root),'utf8'));
  return [project,map,{events:await json(base+'timeline.json')},(await json(base+'features.geojson')).features,await json(base+'cards.json')];
 }
 test('compiled sample has valid coordinates, card references, and chronological events',async()=>{
@@ -22,7 +22,7 @@ test('rejects impossible dates',async()=>{const a=await fixture();a[2].events[0]
 test('rejects invalid and empty coordinates',async()=>{const a=await fixture();a[3][0].geometry.coordinates=[200,45];assert.throws(()=>validateContent(...a),/Invalid coordinate/);const b=await fixture();b[3][0].geometry.coordinates=[-90.1,null];assert.throws(()=>validateContent(...b),/Invalid coordinate/);});
 test('rejects missing cards and unclosed regions',async()=>{const a=await fixture();a[4]={};assert.throws(()=>validateContent(...a),/Missing card/);const b=await fixture();b[3].find(f=>f.properties.kind==='region').geometry.coordinates[0].pop();assert.throws(()=>validateContent(...b),/Unclosed region/);});
 test('builds coordinate-only routes and regions independently of card points',async()=>{
- const base='content/projects/lewis_and_clark_expedition/map/';
+ const base='data/projects/lewis_and_clark_expedition/map/';
  const [points,labels,routes,regions]=await Promise.all(['points','labels','routes','regions'].map(name=>readFile(new URL(base+name+'.yaml',root),'utf8').then(yaml)));
  const features=mapFeatures(points,labels,routes,regions);
  assert.equal(points.labels,undefined);
@@ -40,13 +40,13 @@ test('builds coordinate-only routes and regions independently of card points',as
 });
 test('removes executable Markdown',()=>{
  const html=markdown('# A\n<script>alert(1)</script>\n<a href="javascript:alert(1)">bad</a>\n![Photo](assets/images/test.jpg)','sample');
- assert.ok(!html.includes('<script'));assert.ok(!html.includes('javascript:'));assert.ok(html.includes('content/projects/sample/assets/images/test.jpg'));
+ assert.ok(!html.includes('<script'));assert.ok(!html.includes('javascript:'));assert.ok(html.includes('projects/sample/assets/images/test.jpg'));
  assert.throws(()=>markdown('![Photo](assets/images/../../private.jpg)','sample'),/Image must be inside/);
 });
 test('basemap contains all three supplied layers and local photo exists',async()=>{
- const base=await json('content/projects/lewis_and_clark_expedition/assets/maps/basemap.geojson');
+ const base=await json('data/projects/lewis_and_clark_expedition/assets/maps/basemap.geojson');
  assert.deepEqual([...new Set(base.features.map(f=>f.properties.kind))].sort(),['lakes','land','rivers']);
- assert.ok((await readFile(new URL('content/projects/lewis_and_clark_expedition/assets/images/fort-clatsop.jpg',root))).length>1000);
+ assert.ok((await readFile(new URL('data/projects/lewis_and_clark_expedition/assets/images/fort-clatsop.jpg',root))).length>1000);
 });
 
 test('map annotations validate coordinates, kinds, and marker references',async()=>{
@@ -63,14 +63,31 @@ test('map configuration is authored and generated separately from project metada
  const [project,map]=await fixture();
  assert.equal(project.map,undefined);
  assert.equal(map.caption,'THE WESTWARD PASSAGE');
- assert.equal((await json('generated/projects/lewis_and_clark_expedition/project.json')).map,undefined);
- assert.equal((await json('generated/projects/lewis_and_clark_expedition/map.json')).caption,map.caption);
+ assert.equal((await json('dist/projects/lewis_and_clark_expedition/project.json')).map,undefined);
+ assert.equal((await json('dist/projects/lewis_and_clark_expedition/map.json')).caption,map.caption);
 });
 test('About is materialized from sanitized Markdown with site-relative links',async()=>{
- const source=await readFile(new URL('content/about.md',root),'utf8');
- const result=await readFile(new URL('generated/about.html',root),'utf8');
+ const source=await readFile(new URL('data/about.md',root),'utf8');
+ const result=await readFile(new URL('dist/about.html',root),'utf8');
  assert.equal(result,markdown(source));
  assert.match(result,/<h1>/);assert.match(result,/href="\?page=read"/);
  assert.ok(!markdown('<script>alert(1)</script>\n[bad](javascript:alert(1))').includes('javascript:'));
  assert.throws(()=>markdown('![Photo](assets/images/photo.jpg)'),/project asset directory/);
+});
+test('dist contains every runtime asset without source-directory paths',async()=>{
+ const html=await readFile(new URL('dist/index.html',root),'utf8');
+ assert.match(html,/\.\/app\/app\.js/);
+ await readFile(new URL('dist/app/app.js',root));
+ await readFile(new URL('dist/app/app.css',root));
+ const catalog=await json('dist/projects.json');
+ for(const {id} of catalog){
+  const base=`dist/projects/${id}/`;
+  const map=await json(base+'map.json');
+  const cards=await json(base+'cards.json');
+  const notes=await readFile(new URL(base+'notes.html',root),'utf8');
+  for(const asset of [map.basemap,map.style,...[...Object.values(cards),notes].flatMap(html=>[...html.matchAll(/src="([^"]+)"/g)].map(match=>match[1]))]){
+   assert.ok(asset.startsWith(`projects/${id}/assets/`),`Unexpected runtime asset path: ${asset}`);
+   await readFile(new URL(`dist/${asset}`,root));
+  }
+ }
 });

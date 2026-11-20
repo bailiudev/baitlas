@@ -1,18 +1,18 @@
-import {readFile,writeFile,readdir,mkdir,access} from 'node:fs/promises';
+import {readFile,writeFile,readdir,mkdir,access,copyFile,rm} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {yaml,mapFeatures,markdown} from './content.js';
 import {validateContent} from './validate.js';
-const root=fileURLToPath(new URL('../',import.meta.url));
-const content=path.join(root,'content/projects');
-const generated=path.join(root,'generated');
+const root=fileURLToPath(new URL('../../',import.meta.url));
+const projectsDir=path.join(root,'data/projects');
+const dist=path.join(root,'dist');
 const read=p=>readFile(p,'utf8');
 const json=p=>read(p).then(JSON.parse);
-const about=markdown(await read(path.join(root,'content/about.md')));
+const about=markdown(await read(path.join(root,'data/about.md')));
 const output=[];
-for(const entry of (await readdir(content,{withFileTypes:true})).sort((a,b)=>a.name.localeCompare(b.name))) {
+for(const entry of (await readdir(projectsDir,{withFileTypes:true})).sort((a,b)=>a.name.localeCompare(b.name))) {
   if(!entry.isDirectory()) continue;
-  const id=entry.name, dir=path.join(content,id);
+  const id=entry.name, dir=path.join(projectsDir,id);
   const project=yaml(await read(path.join(dir,'project.yaml')));
   if(project.id!==id || !/^[a-z0-9_-]+$/.test(id)) throw new Error(`Project ID must match its folder: ${id}`);
   const map=yaml(await read(path.join(dir,'map/config.yaml')));
@@ -24,25 +24,40 @@ for(const entry of (await readdir(content,{withFileTypes:true})).sort((a,b)=>a.n
   }
   const notes=markdown(await read(path.join(dir,'notes.md')),id);
   validateContent(project,map,timeline,features,cards);
+  const runtimeAssets=new Set();
   for(const key of ['basemap','style']) {
     const relative=map[key];
     if(relative.split('/').includes('..')) throw new Error(`Unsafe asset path: ${relative}`);
     const value=await json(path.join(dir,relative));
     if(key==='basemap' && (value.type!=='FeatureCollection' || !value.features.length)) throw new Error('Basemap is empty or invalid');
-    map[key]=`content/projects/${id}/${relative}`;
+    runtimeAssets.add(relative);
+    map[key]=`projects/${id}/${relative}`;
   }
-  for(const html of [...Object.values(cards),notes]) for(const m of html.matchAll(/src="([^"]+)"/g)) await access(path.join(root,m[1]));
+  for(const html of [...Object.values(cards),notes]) for(const m of html.matchAll(/src="([^"]+)"/g)) {
+    const relative=m[1].replace(`projects/${id}/`,'');
+    await access(path.join(dir,relative));
+    runtimeAssets.add(relative);
+  }
   timeline.events.sort((a,b)=>a.date.localeCompare(b.date));
-  output.push({id,project,map,timeline:timeline.events,features:{type:'FeatureCollection',features},cards,notes});
+  output.push({id,project,map,timeline:timeline.events,features:{type:'FeatureCollection',features},cards,notes,runtimeAssets,dir});
 }
-// Validate every project before replacing generated content.
-await mkdir(generated,{recursive:true});
-await writeFile(path.join(generated,'about.html'),about);
+// Validate every project before replacing output. A full build removes stale files;
+// a content-only build preserves the existing browser bundle.
+if(process.env.BAITLAS_FULL_BUILD==='1') await rm(dist,{recursive:true,force:true});
+else await rm(path.join(dist,'projects'),{recursive:true,force:true});
+await mkdir(dist,{recursive:true});
+await copyFile(path.join(root,'src/browser/index.html'),path.join(dist,'index.html'));
+await writeFile(path.join(dist,'about.html'),about);
 for(const item of output) {
-  const dest=path.join(generated,'projects',item.id);await mkdir(dest,{recursive:true});
+  const dest=path.join(dist,'projects',item.id);await mkdir(dest,{recursive:true});
   for(const [name,value] of Object.entries({'project.json':item.project,'map.json':item.map,'timeline.json':item.timeline,'features.geojson':item.features,'cards.json':item.cards,'notes.html':item.notes})) {
     await writeFile(path.join(dest,name),typeof value==='string'?value:JSON.stringify(value,null,2)+'\n');
   }
+  for(const relative of item.runtimeAssets) {
+    const target=path.join(dest,relative);
+    await mkdir(path.dirname(target),{recursive:true});
+    await copyFile(path.join(item.dir,relative),target);
+  }
   console.log(`Built ${item.id}: ${item.timeline.length} events, ${item.features.features.length} features, ${Object.keys(item.cards).length} cards`);
 }
-await writeFile(path.join(generated,'projects.json'),JSON.stringify(output.map(({project:p})=>({id:p.id,title:p.title,description:p.description,period:p.period,category:p.category,collections:p.collections||[p.category]})),null,2)+'\n');
+await writeFile(path.join(dist,'projects.json'),JSON.stringify(output.map(({project:p})=>({id:p.id,title:p.title,description:p.description,period:p.period,category:p.category,collections:p.collections||[p.category]})),null,2)+'\n');

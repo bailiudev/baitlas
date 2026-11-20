@@ -2,45 +2,39 @@
 
 A local, static storytelling atlas following the **Baitlas Design** file architecture. The first project is `lewis_and_clark_expedition`: 11 timeline events, 9 place cards, 3 schematic outbound route segments, 3 optional focus regions, sourced notes, and a local photograph.
 
-## View the built MVP
+## Build and view the MVP
 
-Generated browser assets and project data are included. No installation is needed to view them:
+Requires Node.js 20+ and npm. Build the complete static site, then serve only `dist/`:
 
 ```sh
-cd /Users/bailiu/Documents/Baitlas/repo
-python3 -m http.server 8000 --bind 127.0.0.1
+npm ci --prefix src
+npm run build --prefix src
+npm run serve --prefix src
 ```
 
 Open **http://127.0.0.1:8000** for the highlights homepage. Read, Hike, and About are separate views served by one `index.html`; the two collections link to project articles. Use an HTTP server; double-clicking `index.html` (`file://`) cannot load the JSON assets in browsers.
 
 The map uses locally bundled Leaflet, Natural Earth geography, and local media. No API key, CDN, tile server, or network request is needed at runtime. Source links open the original references when clicked.
 
-## Install and build
-
-Requires Node.js 20+ and npm. Run from the repository root:
-
-```sh
-npm ci --prefix build
-npm run build --prefix build
-```
+## Build and test
 
 To reproduce the basemap from the preserved shapefiles (only needed when changing the map extent or simplification):
 
 ```sh
-npm run build:map --prefix build
-npm run build --prefix build
+npm run build:map --prefix src
+npm run build --prefix src
 ```
 
 To validate content:
 
 ```sh
-npm test --prefix build
+npm test --prefix src
 ```
 
-An optional Playwright smoke suite covers desktop and mobile interactions:
+The Playwright suite covers desktop and mobile interactions and also runs in CI:
 
 ```sh
-cd build
+cd src
 npx playwright install chromium
 npm run test:browser
 ```
@@ -49,14 +43,12 @@ npm run test:browser
 
 ```text
 .github/workflows/deploy.yml
-index.html                          Shared entry for Home, Read, Hike, About, and articles
-build/
+src/
   package.json, package-lock.json, playwright.config.js
-  build-content.js, build-map.js, build-app.js, content.js, validate.js
-  app.js, pages-view.js, project-loader.js, project-view.js, map-view.js
-  timeline-view.js, card-view.js, notes-view.js, styles.css
-  schemas/, tests/
-content/
+  build/                            Build scripts, validation, and schemas/
+  browser/                          index.html, browser modules, and styles.css
+  tests/                            Content and browser tests
+data/
   about.md                         Site About copy
   shared/maps/                      Original supplied Natural Earth datasets
   projects/lewis_and_clark_expedition/
@@ -65,19 +57,22 @@ content/
     cards/*.md
     assets/maps/basemap.geojson, style.json, README.md
     assets/images/fort-clatsop.jpg, README.md
-generated/
+dist/                               Complete deployable site; built locally and ignored by Git
+  index.html
   app/                             Bundled browser JavaScript, CSS, and Leaflet license
   about.html                       Sanitized About content
   projects.json
   projects/lewis_and_clark_expedition/
     project.json, map.json, features.geojson, timeline.json, cards.json, notes.html
+    assets/maps/basemap.geojson, style.json
+    assets/images/fort-clatsop.jpg
 ```
 
-The necessary basemap-format deviation is **GeoJSON instead of PMTiles**: the provided map sources were Natural Earth shapefiles. `build-map.js` clips and simplifies those local sources into one small regional vector file. Authored points, labels, routes, and regions use YAML; `build-content.js` converts them to `generated/.../features.geojson` for the browser app. `style.json` contains Leaflet path styles. Leaflet's default PNG marker and layer-control icons are unused; `build-app.js` omits them. No glyph fonts or sprite directories are needed because Leaflet draws these vector paths and markers directly. The build scripts keep authored content separate from generated output. The browser app uses `index.html` for every view. The `page` and optional `project` query parameters select the content without server rewrites. Edit the shell in `index.html` and run `npm run build --prefix build` for code or style changes.
+The necessary basemap-format deviation is **GeoJSON instead of PMTiles**: the provided map sources were Natural Earth shapefiles. `build-map.js` clips and simplifies those local sources into one small regional vector file. Authored points, labels, routes, and regions use YAML; `build-content.js` converts them to `dist/projects/.../features.geojson` for the browser app. `style.json` contains Leaflet path styles. Leaflet's default PNG marker and layer-control icons are unused; `build-app.js` omits them. No glyph fonts or sprite directories are needed because Leaflet draws these vector paths and markers directly. The build scripts keep authored data separate from deployable output. The browser app uses one `index.html` for every view. The `page` and optional `project` query parameters select the content without server rewrites. Edit the shell in `src/browser/index.html` and run `npm run build --prefix src` for code or style changes.
 
 ## Author content
 
-- `content/about.md`: all About copy. Use an introductory eyebrow paragraph, one H1, then the lead paragraph and article sections. The browser app supplies layout and typography. `build-content.js` sanitizes this into `generated/about.html`; rebuild after copy edits. About links such as `?page=read` resolve from the site root, including on repository subpaths.
+- `data/about.md`: all About copy. Use an introductory eyebrow paragraph, one H1, then the lead paragraph and article sections. The browser app supplies layout and typography. `build-content.js` sanitizes this into `dist/about.html`; rebuild after copy edits. About links such as `?page=read` resolve from the site root, including on repository subpaths.
 - `project.yaml`: title, descriptive metadata, and source list. Its `id` must match its folder name. Optional `collections: [Read, Hike]` controls which article lists include the project; otherwise `category` supplies the collection.
 - `map/config.yaml`: basemap and style paths, visible bounds, and map presentation fields such as attribution, marker pixel anchors, caption, period, disclaimer, and route/region notes.
 - `timeline.yaml`: dated events, each with a unique ID, a marker ID, summary, and source URL. Multiple events can refer to one place. Events are sorted by date during the build.
@@ -87,7 +82,7 @@ The necessary basemap-format deviation is **GeoJSON instead of PMTiles**: the pr
 - `map/regions.yaml`: region metadata and `boundary` coordinates, each `[longitude, latitude]`. Regions are independent of card points. The content build closes each polygon automatically.
 - `cards/` and `notes.md`: Markdown, with local image paths relative to the project root, such as `assets/images/fort-clatsop.jpg`. HTML is sanitized. Raw scripts and unsafe URLs are removed. Image files must exist.
 
-The content build checks schemas, coordinates, real calendar dates, duplicate IDs, marker/card references, region boundaries, and required assets before emitting generated files. Rebuild after editing authored map content. Serve the repository root, since generated metadata references project assets in `content/`.
+The content build checks schemas, coordinates, real calendar dates, duplicate IDs, marker/card references, region boundaries, and required assets before emitting `dist/`. It copies only runtime maps and images from `data/` into the deployable site. Rebuild after editing authored content, then serve `dist/`.
 
 ## Interaction
 
@@ -105,7 +100,7 @@ The supplied Natural Earth datasets are public domain and represent **generalize
 
 ## GitHub Pages
 
-The existing workflow installs one set of dependencies, builds and validates content and browser assets, then packages `index.html`, `generated/`, and project runtime assets. Source shapefiles and `node_modules` are excluded from the deployed artifact. Paths are relative, so the site supports repository subpaths on GitHub Pages. Deployment occurs on a push to `main` or manual workflow dispatch.
+The workflow installs dependencies, builds `dist/`, runs content and desktop/mobile browser tests against `dist/` alone, then uploads that directory to GitHub Pages. Source files, original shapefiles, and `node_modules` are excluded from the deployed artifact. Paths are relative, so the site supports repository subpaths on GitHub Pages. Deployment occurs on a push to `main` or manual workflow dispatch.
 
 ## Map behavior
 
