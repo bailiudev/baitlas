@@ -1,8 +1,21 @@
 import {build} from 'esbuild';
-import {mkdir,copyFile} from 'node:fs/promises';
+import {readFile,rm,copyFile} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
 const root=fileURLToPath(new URL('../',import.meta.url));
-await build({entryPoints:[root+'renderer/src/app.js'],bundle:true,minify:true,format:'esm',target:['es2022'],outdir:root+'generated/renderer',loader:{'.png':'file'},assetNames:'[name]-[hash]',legalComments:'eof'});
-await mkdir(root+'generated/renderer',{recursive:true});
+const outdir=root+'generated/renderer';
+// The site uses divIcon markers and its own layer controls, so Leaflet's PNG icons are unused.
+const unusedLeafletIcons={name:'unused-leaflet-icons',setup(build){
+  build.onLoad({filter:/[/\\]leaflet[/\\]dist[/\\]leaflet\.css$/},async({path})=>{
+    let contents=await readFile(path,'utf8');
+    for(const name of ['layers.png','layers-2x.png','marker-icon.png']) {
+      const declaration=`background-image: url(images/${name});`;
+      if(!contents.includes(declaration)) throw new Error(`Leaflet CSS icon declaration changed: ${name}`);
+      contents=contents.replace(declaration,'background-image: none;');
+    }
+    return {contents,loader:'css'};
+  });
+}};
+await rm(outdir,{recursive:true,force:true});
+await build({entryPoints:[root+'renderer/src/app.js'],bundle:true,minify:true,format:'esm',target:['es2022'],outdir,plugins:[unusedLeafletIcons],legalComments:'eof'});
 await copyFile(root+'renderer/node_modules/leaflet/LICENSE',root+'generated/renderer/LEAFLET-LICENSE.txt');
 console.log('Built generated/renderer/app.js and app.css');

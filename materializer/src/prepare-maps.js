@@ -10,7 +10,7 @@ const bounds = [-145, 10, -65, 70];
 const sets = {land:'ne_10m_land', lakes:'ne_10m_lakes', rivers:'ne_10m_rivers_lake_centerlines'};
 const features = [];
 for (const [kind, name] of Object.entries(sets)) {
-  const source = await read(path.join(root, 'content/shared/assets/maps/sources', name, name+'.shp'));
+  const source = await read(path.join(root, 'content/shared/maps', name+'.shp'));
   let count = 0;
   for (const feature of source.features) {
     if (!feature.geometry) continue;

@@ -1,6 +1,6 @@
 # Map provenance
 
-`basemap.geojson` is built by `materializer/src/prepare-maps.js` from the supplied Natural Earth shapefiles preserved under `content/shared/assets/maps/sources/`.
+`basemap.geojson` is built by `materializer/src/prepare-maps.js` from the supplied Natural Earth shapefiles preserved under `content/shared/maps/`.
 
 Clip extent: west -145, south 10, east -65, north 70. Simplification tolerance: 0.008 degrees; coordinates rounded to five decimal places. Natural Earth is public domain. Source README and version files are preserved beside each shapefile.
 

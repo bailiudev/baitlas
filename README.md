@@ -64,7 +64,7 @@ renderer/
   tests/
 content/
   about.md                         Site About copy
-  shared/assets/maps/sources/       Original supplied Natural Earth datasets
+  shared/maps/                      Original supplied Natural Earth datasets
   projects/lewis_and_clark_expedition/
     project.yaml, timeline.yaml, notes.md
     map/config.yaml, points.yaml, labels.yaml, routes.yaml, regions.yaml
@@ -79,7 +79,7 @@ generated/
     project.json, map.json, features.geojson, timeline.json, cards.json, notes.html
 ```
 
-The necessary basemap-format deviation is **GeoJSON instead of PMTiles**: the provided map sources were Natural Earth shapefiles. `prepare-maps.js` clips and simplifies those local sources into one small regional vector file. Authored points, labels, routes, and regions use YAML; the materializer converts them to `generated/.../features.geojson` for the renderer. `style.json` contains Leaflet path styles. No glyph fonts or sprite directories are needed because Leaflet draws these vector paths and markers directly. The additional build/configuration scripts make the authored/generated separation reproducible. The renderer uses `index.html` for every view. The `page` and optional `project` query parameters select the content without server rewrites. Edit the shell in `index.html` and rebuild the renderer for code or style changes.
+The necessary basemap-format deviation is **GeoJSON instead of PMTiles**: the provided map sources were Natural Earth shapefiles. `prepare-maps.js` clips and simplifies those local sources into one small regional vector file. Authored points, labels, routes, and regions use YAML; the materializer converts them to `generated/.../features.geojson` for the renderer. `style.json` contains Leaflet path styles. Leaflet's default PNG marker and layer-control icons are unused; the renderer build omits them. No glyph fonts or sprite directories are needed because Leaflet draws these vector paths and markers directly. The additional build/configuration scripts make the authored/generated separation reproducible. The renderer uses `index.html` for every view. The `page` and optional `project` query parameters select the content without server rewrites. Edit the shell in `index.html` and rebuild the renderer for code or style changes.
 
 ## Author content
 
