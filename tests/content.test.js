@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFile} from 'node:fs/promises';
+import {readFile,readdir} from 'node:fs/promises';
 import {validateContent} from '../src/build/validate.js';
 import {markdown,mapFeatures,yaml} from '../src/build/content-utils.js';
 const root=new URL('../',import.meta.url);
@@ -9,7 +9,8 @@ async function fixture(){
  const base='dist/projects/lewis_and_clark_expedition/';
  const project=yaml(await readFile(new URL('data/projects/lewis_and_clark_expedition/project.yaml',root),'utf8'));
  const map=yaml(await readFile(new URL('data/projects/lewis_and_clark_expedition/map/config.yaml',root),'utf8'));
- return [project,map,{events:await json(base+'timeline.json')},(await json(base+'features.geojson')).features,await json(base+'cards.json')];
+ const compiled=await json(base+'project.json');
+ return [project,map,{events:compiled.timeline},compiled.features.features,compiled.cards];
 }
 test('compiled sample has valid coordinates, card references, and chronological events',async()=>{
  const args=await fixture();validateContent(...args);
@@ -61,10 +62,13 @@ test('map annotations validate coordinates, kinds, and marker references',async(
 });
 test('map configuration is authored and generated separately from project metadata',async()=>{
  const [project,map]=await fixture();
+ const compiled=await json('dist/projects/lewis_and_clark_expedition/project.json');
+ assert.deepEqual(Object.keys(compiled).sort(),['cards','features','map','notes','project','timeline']);
  assert.equal(project.map,undefined);
  assert.equal(map.caption,'THE WESTWARD PASSAGE');
- assert.equal((await json('dist/projects/lewis_and_clark_expedition/project.json')).map,undefined);
- assert.equal((await json('dist/projects/lewis_and_clark_expedition/map.json')).caption,map.caption);
+ assert.deepEqual(compiled.project,project);
+ assert.equal(compiled.project.map,undefined);
+ assert.equal(compiled.map.caption,map.caption);
 });
 test('About is materialized from sanitized Markdown with site-relative links',async()=>{
  const source=await readFile(new URL('data/about.md',root),'utf8');
@@ -82,9 +86,10 @@ test('dist contains every runtime asset without source-directory paths',async()=
  const catalog=await json('dist/projects.json');
  for(const {id} of catalog){
   const base=`dist/projects/${id}/`;
-  const map=await json(base+'map.json');
-  const cards=await json(base+'cards.json');
-  const notes=await readFile(new URL(base+'notes.html',root),'utf8');
+  assert.deepEqual((await readdir(new URL(base,root))).sort(),['assets','project.json']);
+  const {map,cards,notes,features,timeline}=await json(base+'project.json');
+  assert.equal(features.type,'FeatureCollection');
+  assert.ok(timeline.length>0);
   for(const asset of [map.basemap,map.style,...[...Object.values(cards),notes].flatMap(html=>[...html.matchAll(/src="([^"]+)"/g)].map(match=>match[1]))]){
    assert.ok(asset.startsWith(`projects/${id}/assets/`),`Unexpected runtime asset path: ${asset}`);
    await readFile(new URL(`dist/${asset}`,root));

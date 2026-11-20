@@ -46,13 +46,12 @@ for(const entry of (await readdir(projectsDir,{withFileTypes:true})).sort((a,b)=
 if(process.env.BAITLAS_FULL_BUILD==='1') await rm(dist,{recursive:true,force:true});
 else await rm(path.join(dist,'projects'),{recursive:true,force:true});
 await mkdir(dist,{recursive:true});
-await copyFile(path.join(root,'src/browser/index.html'),path.join(dist,'index.html'));
+await copyFile(path.join(root,'src/app/index.html'),path.join(dist,'index.html'));
 await writeFile(path.join(dist,'about.html'),about);
 for(const item of output) {
   const dest=path.join(dist,'projects',item.id);await mkdir(dest,{recursive:true});
-  for(const [name,value] of Object.entries({'project.json':item.project,'map.json':item.map,'timeline.json':item.timeline,'features.geojson':item.features,'cards.json':item.cards,'notes.html':item.notes})) {
-    await writeFile(path.join(dest,name),typeof value==='string'?value:JSON.stringify(value,null,2)+'\n');
-  }
+  const payload={project:item.project,map:item.map,features:item.features,timeline:item.timeline,cards:item.cards,notes:item.notes};
+  await writeFile(path.join(dest,'project.json'),JSON.stringify(payload,null,2)+'\n');
   for(const relative of item.runtimeAssets) {
     const target=path.join(dest,relative);
     await mkdir(path.dirname(target),{recursive:true});

@@ -45,7 +45,7 @@ npm run test:browser
 package.json, package-lock.json, playwright.config.js
 src/
   build/                            Build scripts, validation, and schemas/
-  browser/                          index.html, browser modules, and styles.css
+  app/                              index.html, browser modules, and styles.css
 tests/                              Content and browser tests; ignored results/
 data/
   about.md                         Site About copy
@@ -62,12 +62,12 @@ dist/                               Complete deployable site; built locally and 
   about.html                       Sanitized About content
   projects.json
   projects/lewis_and_clark_expedition/
-    project.json, map.json, features.geojson, timeline.json, cards.json, notes.html
+    project.json                    Metadata, map config/features, timeline, cards, notes
     assets/maps/basemap.geojson, style.json
     assets/images/fort-clatsop.jpg
 ```
 
-The necessary basemap-format deviation is **GeoJSON instead of PMTiles**: the provided map sources were Natural Earth shapefiles. `build-map.js` clips and simplifies those local sources into one small regional vector file. Authored points, labels, routes, and regions use YAML; `build-content.js` converts them to `dist/projects/.../features.geojson` for the browser app. `style.json` contains Leaflet path styles. Leaflet's default PNG marker and layer-control icons are unused; `build-app.js` omits them. No glyph fonts or sprite directories are needed because Leaflet draws these vector paths and markers directly. The build scripts keep authored data separate from deployable output. The browser app uses one `index.html` for every view. The `page` and optional `project` query parameters select the content without server rewrites. Edit the shell in `src/browser/index.html` and run `npm run build` for code or style changes.
+The necessary basemap-format deviation is **GeoJSON instead of PMTiles**: the provided map sources were Natural Earth shapefiles. `build-map.js` clips and simplifies those local sources into one small regional vector file. Authored points, labels, routes, and regions use YAML; `build-content.js` converts them into the project's single `dist/projects/.../project.json`, which also contains the compiled article and timeline. The large basemap stays separate. `style.json` contains Leaflet path styles. Leaflet's default PNG marker and layer-control icons are unused; `build-app.js` omits them. No glyph fonts or sprite directories are needed because Leaflet draws these vector paths and markers directly. The build scripts keep authored data separate from deployable output. The browser app uses one `index.html` for every view. The `page` and optional `project` query parameters select the content without server rewrites. Edit the shell in `src/app/index.html` and run `npm run build` for code or style changes.
 
 ## Author content
 
