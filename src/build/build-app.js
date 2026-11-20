@@ -17,5 +17,5 @@ const unusedLeafletIcons={name:'unused-leaflet-icons',setup(build){
 }};
 await rm(outdir,{recursive:true,force:true});
 await build({entryPoints:[root+'src/browser/app.js'],bundle:true,minify:true,format:'esm',target:['es2022'],outdir,plugins:[unusedLeafletIcons],legalComments:'eof'});
-await copyFile(root+'src/node_modules/leaflet/LICENSE',outdir+'/LEAFLET-LICENSE.txt');
+await copyFile(root+'node_modules/leaflet/LICENSE',outdir+'/LEAFLET-LICENSE.txt');
 console.log('Built dist/app/app.js and app.css');

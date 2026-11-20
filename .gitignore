@@ -1,7 +1,7 @@
 node_modules/
 .DS_Store
 playwright-report/
-test-results/
+tests/results/
 
 dist/
 _site/

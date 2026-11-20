@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {validateContent} from '../build/validate.js';
-import {markdown,mapFeatures,yaml} from '../build/content.js';
-const root=new URL('../../',import.meta.url);
+import {validateContent} from '../src/build/validate.js';
+import {markdown,mapFeatures,yaml} from '../src/build/content.js';
+const root=new URL('../',import.meta.url);
 const json=async p=>JSON.parse(await readFile(new URL(p,root),'utf8'));
 async function fixture(){
  const base='dist/projects/lewis_and_clark_expedition/';

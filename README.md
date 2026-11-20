@@ -7,9 +7,9 @@ A local, static storytelling atlas following the **Baitlas Design** file archite
 Requires Node.js 20+ and npm. Build the complete static site, then serve only `dist/`:
 
 ```sh
-npm ci --prefix src
-npm run build --prefix src
-npm run serve --prefix src
+npm ci
+npm run build
+npm run serve
 ```
 
 Open **http://127.0.0.1:8000** for the highlights homepage. Read, Hike, and About are separate views served by one `index.html`; the two collections link to project articles. Use an HTTP server; double-clicking `index.html` (`file://`) cannot load the JSON assets in browsers.
@@ -21,20 +21,19 @@ The map uses locally bundled Leaflet, Natural Earth geography, and local media. 
 To reproduce the basemap from the preserved shapefiles (only needed when changing the map extent or simplification):
 
 ```sh
-npm run build:map --prefix src
-npm run build --prefix src
+npm run build:map
+npm run build
 ```
 
-To validate content:
+Build before running the content tests, which inspect `dist/`:
 
 ```sh
-npm test --prefix src
+npm test
 ```
 
 The Playwright suite covers desktop and mobile interactions and also runs in CI:
 
 ```sh
-cd src
 npx playwright install chromium
 npm run test:browser
 ```
@@ -43,11 +42,11 @@ npm run test:browser
 
 ```text
 .github/workflows/deploy.yml
+package.json, package-lock.json, playwright.config.js
 src/
-  package.json, package-lock.json, playwright.config.js
   build/                            Build scripts, validation, and schemas/
   browser/                          index.html, browser modules, and styles.css
-  tests/                            Content and browser tests
+tests/                              Content and browser tests; ignored results/
 data/
   about.md                         Site About copy
   shared/maps/                      Original supplied Natural Earth datasets
@@ -68,7 +67,7 @@ dist/                               Complete deployable site; built locally and 
     assets/images/fort-clatsop.jpg
 ```
 
-The necessary basemap-format deviation is **GeoJSON instead of PMTiles**: the provided map sources were Natural Earth shapefiles. `build-map.js` clips and simplifies those local sources into one small regional vector file. Authored points, labels, routes, and regions use YAML; `build-content.js` converts them to `dist/projects/.../features.geojson` for the browser app. `style.json` contains Leaflet path styles. Leaflet's default PNG marker and layer-control icons are unused; `build-app.js` omits them. No glyph fonts or sprite directories are needed because Leaflet draws these vector paths and markers directly. The build scripts keep authored data separate from deployable output. The browser app uses one `index.html` for every view. The `page` and optional `project` query parameters select the content without server rewrites. Edit the shell in `src/browser/index.html` and run `npm run build --prefix src` for code or style changes.
+The necessary basemap-format deviation is **GeoJSON instead of PMTiles**: the provided map sources were Natural Earth shapefiles. `build-map.js` clips and simplifies those local sources into one small regional vector file. Authored points, labels, routes, and regions use YAML; `build-content.js` converts them to `dist/projects/.../features.geojson` for the browser app. `style.json` contains Leaflet path styles. Leaflet's default PNG marker and layer-control icons are unused; `build-app.js` omits them. No glyph fonts or sprite directories are needed because Leaflet draws these vector paths and markers directly. The build scripts keep authored data separate from deployable output. The browser app uses one `index.html` for every view. The `page` and optional `project` query parameters select the content without server rewrites. Edit the shell in `src/browser/index.html` and run `npm run build` for code or style changes.
 
 ## Author content
 

@@ -8,6 +8,6 @@
 - The desktop/mobile layout checks for the map, independent timeline, and notes were completed before the routing change. This change preserves their markup and styles.
 - `git diff --check` passed.
 
-At the time of this check, the desktop/mobile Playwright suite passed a syntax check but was not executed because the local Chromium executable was absent. The interactions above were checked in the Codex in-app browser. The current suite runs in CI against `dist/`; locally, install Chromium with `npx playwright install chromium` inside `src/`, then run `npm run test:browser`.
+At the time of this check, the desktop/mobile Playwright suite passed a syntax check but was not executed because the local Chromium executable was absent. The interactions above were checked in the Codex in-app browser. The current suite runs in CI against `dist/`; locally, install Chromium with `npx playwright install chromium` from the repository root, then run `npm run test:browser`.
 
 The expedition remains a historical route study with schematic routes and generalized modern geography.
