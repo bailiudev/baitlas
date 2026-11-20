@@ -1,7 +1,7 @@
 import {readFile,writeFile,readdir,mkdir,access,copyFile,rm} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {yaml,mapFeatures,markdown} from './content.js';
+import {yaml,mapFeatures,markdown} from './content-utils.js';
 import {validateContent} from './validate.js';
 const root=fileURLToPath(new URL('../../',import.meta.url));
 const projectsDir=path.join(root,'data/projects');
