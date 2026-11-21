@@ -10,9 +10,9 @@ Mandan and Hidatsa communities were central to the first winter. Sacagawea and T
 
 Fort Clatsop sheltered the party during the rainy winter of 1805–1806. Preparing provisions and organizing records occupied the months before the March departure. The building visitors see today is a reconstruction. [National Park Service](https://www.nps.gov/places/fort-clatsop-or.htm)
 
-![Fort Clatsop replica beneath evergreen trees](assets/images/fort-clatsop.jpg)
+![Fort Clatsop replica beneath evergreen trees](images/fort-clatsop.jpg)
 
-*Modern Fort Clatsop replica. Image: National Park Service.*
+*Modern Fort Clatsop replica. [Image: National Park Service](https://www.nps.gov/common/uploads/cropped_image/primary/7F70F4BA-EA22-E480-C2079FE4A3EEAAB9.jpg?mode=crop&quality=90&width=1600), retrieved November 17, 2026.*
 
 ### How to read this map
 

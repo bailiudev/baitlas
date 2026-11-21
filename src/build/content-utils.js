@@ -7,10 +7,11 @@ export function mapFeatures(points, labels, routes, regions) {
   if('labels' in points) throw new Error('Labels belong in labels.yaml, not points.yaml');
   const markerIds=new Set();
   const features=[];
-  for(const {id,title,coordinates,card,...properties} of points.markers) {
+  for(const {id,title,coordinates,...properties} of points.markers) {
     if(markerIds.has(id)) throw new Error(`Duplicate marker: ${id}`);
+    if('card' in properties)throw new Error(`Card references are inferred from marker IDs: ${id}`);
     markerIds.add(id);
-    features.push({type:'Feature',properties:{id,title,card,kind:'marker',...properties},geometry:{type:'Point',coordinates}});
+    features.push({type:'Feature',properties:{id,title,kind:'marker',...properties},geometry:{type:'Point',coordinates}});
   }
   for(const {id,coordinates,...properties} of labels.labels) {
     features.push({type:'Feature',properties:{id,kind:'label',...properties},geometry:{type:'Point',coordinates}});
@@ -38,8 +39,8 @@ export function markdown(text, id) {
       a: (tag,attrs)=>({tagName:tag,attribs:{...attrs,rel:'noopener noreferrer'}}),
       img: (tag,attrs)=> {
         // Author paths are relative to the project's root. Keep the entire runtime local.
-        if(!id) throw new Error('Images require a project asset directory');
-        if(!/^assets\/images\/[a-zA-Z0-9_./-]+$/.test(attrs.src||'') || attrs.src.split('/').includes('..')) throw new Error(`Image must be inside assets/images: ${attrs.src}`);
+        if(!id) throw new Error('Images require a project directory');
+        if(!/^images\/[a-zA-Z0-9_-][a-zA-Z0-9_.-]*\.(?:avif|gif|jpe?g|png|svg|webp)$/i.test(attrs.src||'') || attrs.src.split('/').includes('..')) throw new Error(`Image must be inside images/: ${attrs.src}`);
         return {tagName:tag,attribs:{...attrs,src:`projects/${id}/${attrs.src}`,loading:'lazy'}};
       }
     }

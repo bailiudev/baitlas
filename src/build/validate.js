@@ -6,7 +6,7 @@ const projectSchema = ajv.compile(schema('project'));
 const mapSchema = ajv.compile(schema('map'));
 const timelineSchema = ajv.compile(schema('timeline'));
 export function validateSchema(project, map, timeline) {
-  for (const [name, check, value] of [['project.yaml',projectSchema,project],['map/config.yaml',mapSchema,map],['timeline.yaml',timelineSchema,timeline]]) {
+  for (const [name, check, value] of [['project.yaml',projectSchema,project],['maps/config.yaml',mapSchema,map],['timeline.yaml',timelineSchema,timeline]]) {
     if (!check(value)) throw new Error(`${name}: ${ajv.errorsText(check.errors)}`);
   }
   for (const key of ['bounds','extent']) {
@@ -30,7 +30,7 @@ export function validateContent(project, map, timeline, features, cards) {
     if(kind==='marker' || kind==='label') {
       if(g?.type!=='Point') throw new Error(`${kind} ${id} must be a Point`);
       coordinate(g.coordinates);
-      if(kind==='marker' && !cards[f.properties.card]) throw new Error(`Missing card for ${id}`);
+      if(kind==='marker' && !cards[id]) throw new Error(`Missing card for ${id}`);
       if(kind==='label' && (typeof f.properties.text!=='string' || !f.properties.text.trim() || !['ocean','mountain','river'].includes(f.properties.style))) throw new Error(`Invalid label: ${id}`);
     } else {
       if(!/^#[0-9a-f]{6}$/i.test(f.properties.color)) throw new Error(`Invalid color for ${id}`);
@@ -50,6 +50,7 @@ export function validateContent(project, map, timeline, features, cards) {
     }
   }
   const markers=new Set(features.filter(f=>f.properties.kind==='marker').map(f=>f.properties.id));
+  for(const id of Object.keys(cards))if(!markers.has(id))throw new Error(`Card has no marker: ${id}`);
   for(const id of Object.keys(map.markerAnchors||{}))if(!markers.has(id))throw new Error(`Unknown marker anchor: ${id}`);
   const eventIds=new Set();
   for(const e of timeline.events) {

@@ -1,14 +1,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFile,readdir} from 'node:fs/promises';
+import {readFile,readdir,mkdtemp,mkdir,writeFile,rm} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
+import path from 'node:path';
 import {validateContent} from '../src/build/validate.js';
 import {markdown,mapFeatures,yaml} from '../src/build/content-utils.js';
+import {prepareBasemap} from '../src/build/build-map.js';
 const root=new URL('../',import.meta.url);
 const json=async p=>JSON.parse(await readFile(new URL(p,root),'utf8'));
 async function fixture(){
  const base='dist/projects/lewis_and_clark_expedition/';
  const project=yaml(await readFile(new URL('data/projects/lewis_and_clark_expedition/project.yaml',root),'utf8'));
- const map=yaml(await readFile(new URL('data/projects/lewis_and_clark_expedition/map/config.yaml',root),'utf8'));
+ const map=yaml(await readFile(new URL('data/projects/lewis_and_clark_expedition/maps/config.yaml',root),'utf8'));
  const compiled=await json(base+'project.json');
  return [project,map,{events:compiled.timeline},compiled.features.features,compiled.cards];
 }
@@ -23,10 +26,12 @@ test('rejects impossible dates',async()=>{const a=await fixture();a[2].events[0]
 test('rejects invalid and empty coordinates',async()=>{const a=await fixture();a[3][0].geometry.coordinates=[200,45];assert.throws(()=>validateContent(...a),/Invalid coordinate/);const b=await fixture();b[3][0].geometry.coordinates=[-90.1,null];assert.throws(()=>validateContent(...b),/Invalid coordinate/);});
 test('rejects missing cards and unclosed regions',async()=>{const a=await fixture();a[4]={};assert.throws(()=>validateContent(...a),/Missing card/);const b=await fixture();b[3].find(f=>f.properties.kind==='region').geometry.coordinates[0].pop();assert.throws(()=>validateContent(...b),/Unclosed region/);});
 test('builds coordinate-only routes and regions independently of card points',async()=>{
- const base='data/projects/lewis_and_clark_expedition/map/';
+ const base='data/projects/lewis_and_clark_expedition/maps/';
  const [points,labels,routes,regions]=await Promise.all(['points','labels','routes','regions'].map(name=>readFile(new URL(base+name+'.yaml',root),'utf8').then(yaml)));
  const features=mapFeatures(points,labels,routes,regions);
  assert.equal(points.labels,undefined);
+ assert.equal(points.markers[0].card,undefined);
+ assert.equal(features.find(f=>f.properties.kind==='marker').properties.card,undefined);
  assert.equal(labels.labels.length,4);
  const marker=features.find(f=>f.properties.id==='camp-dubois');
  const route=features.find(f=>f.properties.id==='missouri');
@@ -38,16 +43,42 @@ test('builds coordinate-only routes and regions independently of card points',as
  assert.throws(()=>mapFeatures(points,labels,broken,regions),/array of \[longitude, latitude\] coordinates/);
  const brokenRegion=structuredClone(regions);brokenRegion.regions[0].boundary[0]={marker:'camp-dubois'};
  assert.throws(()=>mapFeatures(points,labels,routes,brokenRegion),/array of \[longitude, latitude\] coordinates/);
+ const oldCard=structuredClone(points);oldCard.markers[0].card='camp-dubois';
+ assert.throws(()=>mapFeatures(oldCard,labels,routes,regions),/Card references are inferred/);
 });
 test('removes executable Markdown',()=>{
- const html=markdown('# A\n<script>alert(1)</script>\n<a href="javascript:alert(1)">bad</a>\n![Photo](assets/images/test.jpg)','sample');
- assert.ok(!html.includes('<script'));assert.ok(!html.includes('javascript:'));assert.ok(html.includes('projects/sample/assets/images/test.jpg'));
- assert.throws(()=>markdown('![Photo](assets/images/../../private.jpg)','sample'),/Image must be inside/);
+ const html=markdown('# A\n<script>alert(1)</script>\n<a href="javascript:alert(1)">bad</a>\n![Photo](images/test.jpg)','sample');
+ assert.ok(!html.includes('<script'));assert.ok(!html.includes('javascript:'));assert.ok(html.includes('projects/sample/images/test.jpg'));
+ assert.throws(()=>markdown('![Photo](images/../private.jpg)','sample'),/Image must be inside/);
+ assert.throws(()=>markdown('![Photo](images/not-an-image.txt)','sample'),/Image must be inside/);
 });
-test('basemap contains all three supplied layers and local photo exists',async()=>{
- const base=await json('data/projects/lewis_and_clark_expedition/assets/maps/basemap.geojson');
+test('basemap is generated only in dist and local photo remains in images',async()=>{
+ const base=await json('dist/projects/lewis_and_clark_expedition/maps/basemap.geojson');
  assert.deepEqual([...new Set(base.features.map(f=>f.properties.kind))].sort(),['lakes','land','rivers']);
- assert.ok((await readFile(new URL('data/projects/lewis_and_clark_expedition/assets/images/fort-clatsop.jpg',root))).length>1000);
+ await assert.rejects(readFile(new URL('data/projects/lewis_and_clark_expedition/maps/basemap.geojson',root)),/ENOENT/);
+ assert.ok((await readFile(new URL('data/projects/lewis_and_clark_expedition/images/fort-clatsop.jpg',root))).length>1000);
+});
+test('custom basemaps in maps load without accessing paths outside that folder',async()=>{
+ const dir=await mkdtemp(path.join(tmpdir(),'baitlas-map-'));
+ try {
+  await mkdir(path.join(dir,'maps'));
+  const custom={type:'FeatureCollection',features:[{type:'Feature',properties:{kind:'land'},geometry:{type:'Polygon',coordinates:[[[-1,0],[1,0],[1,1],[-1,0]]]}}]};
+  await writeFile(path.join(dir,'maps/custom.geojson'),JSON.stringify(custom));
+  assert.deepEqual(await prepareBasemap(dir,{basemap:'maps/custom.geojson'}),custom);
+  await assert.rejects(prepareBasemap(dir,{basemap:'maps/../private.geojson'}),/Invalid custom basemap path/);
+  custom.features[0].properties.kind='unknown';
+  await writeFile(path.join(dir,'maps/custom.geojson'),JSON.stringify(custom));
+  await assert.rejects(prepareBasemap(dir,{basemap:'maps/custom.geojson'}),/Basemap features need/);
+ } finally {await rm(dir,{recursive:true,force:true});}
+});
+test('cards are authored in one YAML file keyed by marker ID',async()=>{
+ const project='data/projects/lewis_and_clark_expedition/';
+ const source=yaml(await readFile(new URL(project+'cards.yaml',root),'utf8'));
+ const points=yaml(await readFile(new URL(project+'maps/points.yaml',root),'utf8'));
+ assert.deepEqual(Object.keys(source.cards).sort(),points.markers.map(point=>point.id).sort());
+ assert.match(source.cards['fort-clatsop'],/images\/fort-clatsop.jpg/);
+ const a=await fixture();a[4].unused='<p>Unused</p>';
+ assert.throws(()=>validateContent(...a),/Card has no marker/);
 });
 
 test('map annotations validate coordinates, kinds, and marker references',async()=>{
@@ -66,9 +97,13 @@ test('map configuration is authored and generated separately from project metada
  assert.deepEqual(Object.keys(compiled).sort(),['cards','features','map','notes','project','timeline']);
  assert.equal(project.map,undefined);
  assert.equal(map.caption,'THE WESTWARD PASSAGE');
+ assert.equal(map.basemap,'natural-earth');
+ assert.equal(map.style.ocean,'#dce8e6');
  assert.deepEqual(compiled.project,project);
  assert.equal(compiled.project.map,undefined);
  assert.equal(compiled.map.caption,map.caption);
+ assert.equal(compiled.map.basemap,'projects/lewis_and_clark_expedition/maps/basemap.geojson');
+ assert.deepEqual(compiled.map.style,map.style);
 });
 test('each project has exactly one Read or Hike category',async()=>{
  const [project,map,timeline,features,cards]=await fixture();
@@ -84,7 +119,7 @@ test('About is embedded in its page from sanitized Markdown with site-relative l
  assert.ok(result.includes(markdown(source)));
  assert.match(result,/<h1>/);assert.match(result,/href="read\/"/);
  assert.ok(!markdown('<script>alert(1)</script>\n[bad](javascript:alert(1))').includes('javascript:'));
- assert.throws(()=>markdown('![Photo](assets/images/photo.jpg)'),/project asset directory/);
+ assert.throws(()=>markdown('![Photo](images/photo.jpg)'),/project directory/);
 });
 test('dist contains every runtime asset without source-directory paths',async()=>{
  const html=await readFile(new URL('dist/index.html',root),'utf8');
@@ -105,12 +140,12 @@ test('dist contains every runtime asset without source-directory paths',async()=
   assert.ok(pageHtml.includes(`data-page="${collection}" data-project="${id}"`));
   await assert.rejects(readFile(new URL(`dist/${collection==='read'?'hike':'read'}/${id}/index.html`,root),'utf8'),/ENOENT/);
   const base=`dist/projects/${id}/`;
-  assert.deepEqual((await readdir(new URL(base,root))).sort(),['assets','project.json']);
+  assert.deepEqual((await readdir(new URL(base,root))).sort(),['images','maps','project.json']);
   const {map,cards,notes,features,timeline}=await json(base+'project.json');
   assert.equal(features.type,'FeatureCollection');
   assert.ok(timeline.length>0);
-  for(const asset of [map.basemap,map.style,...[...Object.values(cards),notes].flatMap(html=>[...html.matchAll(/src="([^"]+)"/g)].map(match=>match[1]))]){
-   assert.ok(asset.startsWith(`projects/${id}/assets/`),`Unexpected runtime asset path: ${asset}`);
+  for(const asset of [map.basemap,...[...Object.values(cards),notes].flatMap(html=>[...html.matchAll(/src="([^"]+)"/g)].map(match=>match[1]))]){
+   assert.ok(asset.startsWith(`projects/${id}/maps/`)||asset.startsWith(`projects/${id}/images/`),`Unexpected runtime asset path: ${asset}`);
    await readFile(new URL(`dist/${asset}`,root));
   }
  }

@@ -2,63 +2,54 @@ markers:
   - id: camp-dubois
     title: Camp Dubois
     coordinates: [-90.1, 38.802]
-    card: camp-dubois
     category: Departure
     location_note: "Near the historic departure area; approximate."
     source: "https://www.nps.gov/articles/departure-day.htm"
   - id: floyd
     title: Sergeant Floyd
     coordinates: [-96.408, 42.453]
-    card: floyd
     category: Up the Missouri
     location_note: "Modern monument area; approximate historical location."
     source: "https://www.nps.gov/mnrr/learn/historyculture/the-lewis-and-clark-expedition.htm"
   - id: fort-mandan
     title: Fort Mandan
     coordinates: [-101.47, 47.29]
-    card: fort-mandan
     category: Winter camp
     location_note: "Approximate historic area, not the modern replica. The original fort location is uncertain."
     source: "https://home.nps.gov/places/fort-mandan.htm"
   - id: great-falls
     title: Great Falls
     coordinates: [-111.12, 47.57]
-    card: great-falls
     category: Portage
     location_note: "General Great Falls area; the portage extended well beyond this marker."
     source: "https://home.nps.gov/places/great-falls-portage-mt.htm"
   - id: lemhi-pass
     title: Lemhi Pass
     coordinates: [-113.445, 44.974]
-    card: lemhi-pass
     category: Mountain crossing
     location_note: Approximate pass location.
     source: "https://www.nps.gov/subjects/travellewisandclark/expedition-by-date.htm"
   - id: weippe
     title: Weippe Prairie
     coordinates: [-115.92, 46.35]
-    card: weippe
     category: Encounter
     location_note: "General prairie location, not an exact village site."
     source: "https://www.nps.gov/nepe/learn/historyculture/weippe-prairie-history.htm"
   - id: chinook-point
     title: Chinook Point
     coordinates: [-123.919, 46.251]
-    card: chinook-point
     category: Pacific coast
     location_note: Approximate viewpoint near Chinook Point.
     source: "https://www.nps.gov/subjects/travellewisandclark/expedition-by-date.htm"
   - id: fort-clatsop
     title: Fort Clatsop
     coordinates: [-123.88, 46.134]
-    card: fort-clatsop
     category: Winter camp
     location_note: Modern reconstructed fort near the historical site.
     source: "https://www.nps.gov/places/fort-clatsop-or.htm"
   - id: st-louis
     title: St. Louis
     coordinates: [-90.185, 38.625]
-    card: st-louis
     category: Return
     location_note: Approximate riverfront arrival area.
     source: "https://www.nps.gov/mnrr/learn/historyculture/the-lewis-and-clark-expedition.htm"

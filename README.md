@@ -18,12 +18,7 @@ The map uses locally bundled Leaflet, Natural Earth geography, and local media. 
 
 ## Build and test
 
-To reproduce the basemap from the preserved shapefiles (only needed when changing the map extent or simplification):
-
-```sh
-npm run build:map
-npm run build
-```
+The normal build generates the basemap from the preserved shapefiles. No separate map-preparation command is needed.
 
 Build before running the content tests, which inspect `dist/`:
 
@@ -48,14 +43,13 @@ src/
   app/                              page-template.html, browser modules, and styles.css
 tests/                              Content and browser tests; ignored results/
 data/
-  pages/about.md                   Site About copy
+  pages/about.md                    Site About copy
   shared/maps/                      Original supplied Natural Earth datasets
   projects/lewis_and_clark_expedition/
-    project.yaml, timeline.yaml, notes.md
-    map/config.yaml, points.yaml, labels.yaml, routes.yaml, regions.yaml
-    cards/*.md
-    assets/maps/basemap.geojson, style.json, README.md
-    assets/images/fort-clatsop.jpg, README.md
+    project.yaml, timeline.yaml, notes.md, cards.yaml
+    maps/config.yaml, points.yaml, labels.yaml, routes.yaml, regions.yaml
+    maps/README.md                  Map provenance; custom GeoJSON can live here
+    images/fort-clatsop.jpg
 dist/                               Complete deployable site; built locally and ignored by Git
   index.html
   read/index.html, hike/index.html, about/index.html
@@ -64,25 +58,26 @@ dist/                               Complete deployable site; built locally and 
   projects.json
   projects/lewis_and_clark_expedition/
     project.json                    Metadata, map config/features, timeline, cards, notes
-    assets/maps/basemap.geojson, style.json
-    assets/images/fort-clatsop.jpg
+    maps/basemap.geojson            Generated at build time
+    images/fort-clatsop.jpg
 ```
 
-The necessary basemap-format deviation is **GeoJSON instead of PMTiles**: the provided map sources were Natural Earth shapefiles. `build-map.js` clips and simplifies those local sources into one small regional vector file. Authored points, labels, routes, and regions use YAML; `build-content.js` converts them into the project's single `dist/projects/.../project.json`, which also contains the compiled article and timeline. The large basemap stays separate. `style.json` contains Leaflet path styles. Leaflet's default PNG marker and layer-control icons are unused; `build-app.js` omits them. No glyph fonts or sprite directories are needed because Leaflet draws these vector paths and markers directly. The build scripts keep authored data separate from deployable output. The build generates an `index.html` for each public page from the shared `src/app/page-template.html`; links to older query URLs redirect to the new paths. Edit the template and run `npm run build` for code or style changes.
+The necessary basemap-format deviation is **GeoJSON instead of PMTiles**: the provided map sources were Natural Earth shapefiles. During every full build, `build-map.js` clips and simplifies the shared sources using each project's `maps/config.yaml`, then `build-content.js` writes the resulting `basemap.geojson` directly into `dist/`. A project may instead select a custom GeoJSON file in its `maps/` folder. Authored points, labels, routes, and regions use YAML; `build-content.js` converts them into the project's `project.json`, which also contains the compiled article, cards, timeline, and Leaflet map styles. The large basemap stays separate. Leaflet's default PNG marker and layer-control icons are unused; `build-app.js` omits them. No glyph fonts or sprite directories are needed because Leaflet draws these vector paths and markers directly. The build scripts keep authored data separate from deployable output. The build generates an `index.html` for each public page from the shared `src/app/page-template.html`; links to older query URLs redirect to the new paths. Edit the template and run `npm run build` for code or style changes.
 
 ## Author content
 
 - `data/pages/about.md`: all About copy. Use an introductory eyebrow paragraph, one H1, then the lead paragraph and article sections. The browser app supplies layout and typography. `build-content.js` sanitizes and embeds this into `dist/about/index.html`; rebuild after copy edits. Relative links resolve from the site root, including on repository subpaths.
 - `project.yaml`: title, descriptive metadata, source list, and one required `category: Read` or `category: Hike`. Its `id` must match its folder name. The category determines the project's only collection and URL.
-- `map/config.yaml`: basemap and style paths, visible bounds, and map presentation fields such as attribution, marker pixel anchors, caption, period, disclaimer, and route/region notes.
+- `maps/config.yaml`: `basemap: natural-earth` generates a basemap from `data/shared/maps/`, while `basemap: maps/custom.geojson` selects a project-supplied map. It also holds Leaflet styles, visible bounds, and presentation fields such as attribution, marker pixel anchors, caption, period, disclaimer, and route/region notes. Custom GeoJSON features use `properties.kind` values `land`, `lakes`, or `rivers`.
 - `timeline.yaml`: dated events, each with a unique ID, a marker ID, summary, and source URL. Multiple events can refer to one place. Events are sorted by date during the build.
-- `map/points.yaml`: `markers` with unique IDs, WGS84 `[longitude, latitude]` coordinates, and Markdown card names. These are the selectable locations for timeline events and information cards.
-- `map/labels.yaml`: `labels` with text, coordinates, and an ocean/mountain/river style.
-- `map/routes.yaml`: route metadata and ordered `path` coordinates, each `[longitude, latitude]`. Routes are independent of the points used for cards. Optional `legend_label` and `legend_order` control the legend.
-- `map/regions.yaml`: region metadata and `boundary` coordinates, each `[longitude, latitude]`. Regions are independent of card points. The content build closes each polygon automatically.
-- `cards/` and `notes.md`: Markdown, with local image paths relative to the project root, such as `assets/images/fort-clatsop.jpg`. HTML is sanitized. Raw scripts and unsafe URLs are removed. Image files must exist.
+- `maps/points.yaml`: `markers` with unique IDs and WGS84 `[longitude, latitude]` coordinates. These are the selectable locations for timeline events and information cards. Each marker ID must have a matching entry in `cards.yaml`.
+- `maps/labels.yaml`: `labels` with text, coordinates, and an ocean/mountain/river style.
+- `maps/routes.yaml`: route metadata and ordered `path` coordinates, each `[longitude, latitude]`. Routes are independent of the points used for cards. Optional `legend_label` and `legend_order` control the legend.
+- `maps/regions.yaml`: region metadata and `boundary` coordinates, each `[longitude, latitude]`. Regions are independent of card points. The content build closes each polygon automatically.
+- `cards.yaml`: one `cards:` mapping keyed by marker ID. Each value is a Markdown block scalar (`|`) for the information card.
+- `notes.md` and `images/`: article Markdown and project images. Use image paths relative to the project root, such as `images/fort-clatsop.jpg`. HTML is sanitized. Raw scripts and unsafe URLs are removed. Referenced images must exist.
 
-The content build checks schemas, coordinates, real calendar dates, duplicate IDs, marker/card references, region boundaries, and required assets before emitting `dist/`. It copies only runtime maps and images from `data/` into the deployable site. Rebuild after editing authored content, then serve `dist/`.
+The content build checks schemas, coordinates, real calendar dates, duplicate IDs, marker/card matches, region boundaries, and referenced images before emitting `dist/`. It generates the runtime basemap and copies only used images into the deployable site. Rebuild after editing authored content, then serve `dist/`.
 
 ## Interaction
 
@@ -94,7 +89,7 @@ Selected events have reloadable URLs, e.g. `/read/lewis_and_clark_expedition/#ev
 
 ## Historical scope and provenance
 
-Historical text is summarized from the National Park Service and National Archives, with links in cards, timeline data, and notes. The local photograph depicts a **modern Fort Clatsop reconstruction** and is credited to NPS. See each asset directory's README for provenance.
+Historical text is summarized from the National Park Service and National Archives, with links in cards, timeline data, and notes. The local photograph depicts a **modern Fort Clatsop reconstruction** and is credited to NPS in the notes. Map provenance is recorded in `maps/README.md` and beside the shared shapefiles.
 
 The supplied Natural Earth datasets are public domain and represent **generalized modern geography**, not the landscape in 1804. Coordinates are editorial approximations. Route segments are simplified outbound connections, not reconstructed daily tracks; the split 1806 return routes are intentionally omitted, while the return remains on the timeline. Regions are editorial focus areas, not Indigenous territories or historical political boundaries. Fort Mandan's original location is uncertain.
 

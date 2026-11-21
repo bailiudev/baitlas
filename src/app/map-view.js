@@ -3,8 +3,9 @@ import 'leaflet/dist/leaflet.css';
 import {escapeHTML as h} from './project-loader.js';
 const latLng=c=>[c[1],c[0]];
 export function createMap(element,data,onMarker) {
-  const {features,basemap,style}=data;
+  const {features,basemap}=data;
   const config=data.map;
+  const style=config.style;
   const map=L.map(element,{zoomControl:false,attributionControl:true,preferCanvas:true,minZoom:3,maxZoom:9,zoomSnap:0.25,maxBounds:config.extent.map(latLng),maxBoundsViscosity:0.8,scrollWheelZoom:false});
   element.style.background=style.ocean;
   L.control.zoom({position:'topright'}).addTo(map);

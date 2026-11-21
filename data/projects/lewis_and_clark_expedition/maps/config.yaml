@@ -1,5 +1,20 @@
-basemap: assets/maps/basemap.geojson
-style: assets/maps/style.json
+basemap: natural-earth
+style:
+  ocean: "#dce8e6"
+  land:
+    color: "#b9c2ad"
+    weight: 0.8
+    fillColor: "#f1f0e4"
+    fillOpacity: 1
+  lakes:
+    color: "#acc9cd"
+    weight: 0.5
+    fillColor: "#c7dcdf"
+    fillOpacity: 1
+  rivers:
+    color: "#9ebfc5"
+    weight: 0.85
+    opacity: 0.8
 caption: THE WESTWARD PASSAGE
 period: 1804 — 1805
 disclaimer: Dashed routes and markers are approximate. Regions are editorial focus areas.

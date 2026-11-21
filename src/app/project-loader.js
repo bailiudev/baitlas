@@ -9,8 +9,8 @@ export async function loadProject(id) {
   const base=`projects/${id}/`;
   const content=await fetchData(base+'project.json');
   const {map}=content;
-  const [basemap,style]=await Promise.all([fetchData(map.basemap),fetchData(map.style)]);
-  return {...content,basemap,style};
+  const basemap=await fetchData(map.basemap);
+  return {...content,basemap};
 }
 export function dateLabel(date) {
   return new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',year:'numeric',timeZone:'UTC'}).format(new Date(date+'T00:00:00Z'));

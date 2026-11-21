@@ -81,7 +81,7 @@ test('article section navigation and references stay inside the current project'
  await expect(page).toHaveURL(`${project}#reference-8`);
  await expect(page.locator('#reference-8')).toBeFocused();
  expect(await page.evaluate(()=>document.querySelector('.references').getBoundingClientRect().top>=document.querySelector('.notes-copy').getBoundingClientRect().bottom)).toBe(true);
- await expect(page.locator('.references li')).toHaveCount(10);
+ await expect(page.locator('.references li')).toHaveCount(11);
  await page.locator('.notes-copy img').scrollIntoViewIfNeeded();
  await expect.poll(()=>page.locator('.notes-copy img').evaluate(img=>img.complete&&img.naturalWidth>0)).toBe(true);
 });

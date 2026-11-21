@@ -2,12 +2,27 @@
   "type":"object", "additionalProperties":false,
   "required":["basemap","style","bounds","extent"],
   "properties":{
-    "basemap":{"type":"string","pattern":"^assets/maps/"},"style":{"type":"string","pattern":"^assets/maps/"},
+    "basemap":{"anyOf":[{"const":"natural-earth"},{"type":"string","pattern":"^maps/[a-zA-Z0-9_-]+\\.geojson$"}]},
+    "style":{"type":"object","additionalProperties":false,"required":["ocean","land","lakes","rivers"],"properties":{
+      "ocean":{"$ref":"#/definitions/color"},
+      "land":{"$ref":"#/definitions/pathStyle"},
+      "lakes":{"$ref":"#/definitions/pathStyle"},
+      "rivers":{"$ref":"#/definitions/pathStyle"}
+    }},
     "caption":{"type":"string"},"period":{"type":"string"},"disclaimer":{"type":"string"},
     "attribution":{"type":"object","additionalProperties":false,"required":["title","url"],"properties":{"title":{"type":"string"},"url":{"type":"string","pattern":"^https://"},"note":{"type":"string"}}},
     "markerAnchors":{"type":"object","additionalProperties":{"$ref":"#/definitions/pair"}},
     "routeNote":{"type":"string"},"regionNote":{"type":"string"},
     "bounds":{"$ref":"#/definitions/bounds"},"extent":{"$ref":"#/definitions/bounds"}
   },
-  "definitions":{"pair":{"type":"array","minItems":2,"maxItems":2,"items":{"type":"number"}},"bounds":{"type":"array","minItems":2,"maxItems":2,"items":{"type":"array","minItems":2,"maxItems":2,"items":{"type":"number"}}}}
+  "definitions":{
+    "color":{"type":"string","pattern":"^#[0-9a-fA-F]{6}$"},
+    "pathStyle":{"type":"object","additionalProperties":false,"required":["color","weight"],"properties":{
+      "color":{"$ref":"#/definitions/color"},"fillColor":{"$ref":"#/definitions/color"},
+      "weight":{"type":"number","minimum":0},"opacity":{"type":"number","minimum":0,"maximum":1},
+      "fillOpacity":{"type":"number","minimum":0,"maximum":1}
+    }},
+    "pair":{"type":"array","minItems":2,"maxItems":2,"items":{"type":"number"}},
+    "bounds":{"type":"array","minItems":2,"maxItems":2,"items":{"type":"array","minItems":2,"maxItems":2,"items":{"type":"number"}}}
+  }
 }

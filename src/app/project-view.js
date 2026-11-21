@@ -17,7 +17,7 @@ export function renderProject(container,data,collection='read',initialEvent) {
   function select(id) {
     const index=timeline.findIndex(e=>e.id===id);if(index<0)return;
     selected=index;const event=timeline[index],feature=byId.get(event.marker);
-    map.select(event.marker);timelineView.select(event.id);card.show(feature,cards[feature.properties.card],event);
+    map.select(event.marker);timelineView.select(event.id);card.show(feature,cards[feature.properties.id],event);
     container.querySelector('#event-progress').textContent=`Moment ${index+1} of ${timeline.length}`;
     container.querySelector('#previous-event').disabled=index===0;
     container.querySelector('#next-event').disabled=index===timeline.length-1;
