@@ -41,9 +41,9 @@ for(const entry of (await readdir(projectsDir,{withFileTypes:true})).sort((a,b)=
   validateContent(project,map,timeline,features,cards,sources);
   const basemap=await prepareBasemap(dir,map);
   const runtimeAssets=new Set();
-  map.basemap=`projects/${id}/maps/basemap.geojson`;
+  map.basemap=`resources/projects/${id}/maps/basemap.geojson`;
   for(const html of [...Object.values(cards),notes]) for(const m of html.matchAll(/src="([^"]+)"/g)) {
-    const prefix=`projects/${id}/`;
+    const prefix=`resources/projects/${id}/`;
     if(!m[1].startsWith(prefix))throw new Error(`Invalid image path: ${m[1]}`);
     const relative=m[1].slice(prefix.length);
     await access(path.join(dir,relative));
@@ -56,14 +56,16 @@ for(const entry of (await readdir(projectsDir,{withFileTypes:true})).sort((a,b)=
 // a content-only build preserves the existing browser bundle.
 if(process.env.BAITLAS_FULL_BUILD==='1') await rm(dist,{recursive:true,force:true});
 else {
-  await Promise.all(['projects','read','hike','about'].map(name=>rm(path.join(dist,name),{recursive:true,force:true})));
+  await Promise.all(['read','hike','about'].map(name=>rm(path.join(dist,name),{recursive:true,force:true})));
+  await rm(path.join(dist,'resources/projects'),{recursive:true,force:true});
+  await rm(path.join(dist,'resources/projects.json'),{force:true});
   await rm(path.join(dist,'about.html'),{force:true});
 }
 await mkdir(dist,{recursive:true});
 await writePage('index.html','home');
 await Promise.all(['read','hike','about'].map(page=>writePage(`${page}/index.html`,page)));
 for(const item of output) {
-  const dest=path.join(dist,'projects',item.id);await mkdir(dest,{recursive:true});
+  const dest=path.join(dist,'resources/projects',item.id);await mkdir(dest,{recursive:true});
   const payload={project:item.project,sources:item.sources,map:item.map,features:item.features,timeline:item.timeline,cards:item.cards,notes:item.notes};
   await writeFile(path.join(dest,'project.json'),JSON.stringify(payload,null,2)+'\n');
   await mkdir(path.join(dest,'maps'),{recursive:true});
@@ -77,4 +79,4 @@ for(const item of output) {
   await writePage(`${page}/${item.id}/index.html`,page,item.id);
   console.log(`Built ${item.id}: ${item.timeline.length} events, ${item.features.features.length} features, ${Object.keys(item.cards).length} cards`);
 }
-await writeFile(path.join(dist,'projects.json'),JSON.stringify(output.map(({project:p})=>({id:p.id,title:p.title,description:p.description,period:p.period,category:p.category})),null,2)+'\n');
+await writeFile(path.join(dist,'resources/projects.json'),JSON.stringify(output.map(({project:p})=>({id:p.id,title:p.title,description:p.description,period:p.period,category:p.category})),null,2)+'\n');

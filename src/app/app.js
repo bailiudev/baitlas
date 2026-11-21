@@ -15,7 +15,7 @@ try {
   if(page==='about') {
     renderAbout(main);document.title='About · Baitlas';
   } else {
-    const catalog=await fetchData('projects.json');
+    const catalog=await fetchData('resources/projects.json');
     const legacyPage=params.get('page');
     if(page==='home'&&['read','hike','about'].includes(legacyPage)) {
       const legacyProject=catalog.find(p=>p.id===params.get('project'));

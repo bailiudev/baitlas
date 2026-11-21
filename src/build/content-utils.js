@@ -41,7 +41,7 @@ export function markdown(text, id) {
         // Author paths are relative to the project's root. Keep the entire runtime local.
         if(!id) throw new Error('Images require a project directory');
         if(!/^images\/[a-zA-Z0-9_-][a-zA-Z0-9_.-]*\.(?:avif|gif|jpe?g|png|svg|webp)$/i.test(attrs.src||'') || attrs.src.split('/').includes('..')) throw new Error(`Image must be inside images/: ${attrs.src}`);
-        return {tagName:tag,attribs:{...attrs,src:`projects/${id}/${attrs.src}`,loading:'lazy'}};
+        return {tagName:tag,attribs:{...attrs,src:`resources/projects/${id}/${attrs.src}`,loading:'lazy'}};
       }
     }
   });

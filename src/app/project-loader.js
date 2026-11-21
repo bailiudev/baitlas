@@ -6,7 +6,7 @@ export async function fetchData(path, asText=false) {
 }
 export async function loadProject(id) {
   if(!/^[a-z0-9_-]+$/.test(id)) throw new Error('Invalid project identifier');
-  const base=`projects/${id}/`;
+  const base=`resources/projects/${id}/`;
   const content=await fetchData(base+'project.json');
   const {map}=content;
   const basemap=await fetchData(map.basemap);

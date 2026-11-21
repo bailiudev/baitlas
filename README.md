@@ -53,15 +53,17 @@ dist/                               Complete deployable site; built locally and 
   index.html
   read/index.html, hike/index.html, about/index.html
   read/lewis_and_clark_expedition/index.html
-  app/                             Bundled browser JavaScript, CSS, and Leaflet license
-  projects.json
-  projects/lewis_and_clark_expedition/
-    project.json                    Metadata, sources, map config/features, timeline, cards, notes
-    maps/basemap.geojson            Generated at build time
-    images/fort-clatsop.jpg
+  resources/                       Files loaded by the pages
+    app.js, app.css                 Bundled browser code and styles
+    LEAFLET-LICENSE.txt
+    projects.json                   Project listing
+    projects/lewis_and_clark_expedition/
+      project.json                  Metadata, sources, map config/features, timeline, cards, notes
+      maps/basemap.geojson          Generated at build time
+      images/fort-clatsop.jpg
 ```
 
-The necessary basemap-format deviation is **GeoJSON instead of PMTiles**: the provided map sources were Natural Earth shapefiles. During every full build, `build-map.js` clips and simplifies the shared sources using each project's `maps/config.yaml`, then `build-content.js` writes the resulting `basemap.geojson` directly into `dist/`. A project may instead select a custom GeoJSON file in its `maps/` folder. Authored points, labels, routes, and regions use YAML; `build-content.js` converts them into the project's `project.json`, which also contains the compiled article, cards, timeline, and Leaflet map styles. The large basemap stays separate. Leaflet's default PNG marker and layer-control icons are unused; `build-app.js` omits them. No glyph fonts or sprite directories are needed because Leaflet draws these vector paths and markers directly. The build scripts keep authored data separate from deployable output. The build generates an `index.html` for each public page from the shared `src/app/page-template.html`; links to older query URLs redirect to the new paths. Edit the template and run `npm run build` for code or style changes.
+The necessary basemap-format deviation is **GeoJSON instead of PMTiles**: the provided map sources were Natural Earth shapefiles. During every full build, `build-map.js` clips and simplifies the shared sources using each project's `maps/config.yaml`, then `build-content.js` writes the resulting `basemap.geojson` into `dist/resources/projects/`. A project may instead select a custom GeoJSON file in its `maps/` folder. Authored points, labels, routes, and regions use YAML; `build-content.js` converts them into the project's `project.json`, which also contains the compiled article, cards, timeline, and Leaflet map styles. The large basemap stays separate. Leaflet's default PNG marker and layer-control icons are unused; `build-app.js` omits them. No glyph fonts or sprite directories are needed because Leaflet draws these vector paths and markers directly. The build scripts keep authored data separate from deployable output. The build generates an `index.html` for each public page from the shared `src/app/page-template.html`; links to older query URLs redirect to the new paths. Edit the template and run `npm run build` for code or style changes.
 
 ## Author content
 

@@ -1,8 +1,8 @@
 import {build} from 'esbuild';
-import {readFile,rm,copyFile} from 'node:fs/promises';
+import {readFile,copyFile} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
 const root=fileURLToPath(new URL('../../',import.meta.url));
-const outdir=root+'dist/app';
+const outdir=root+'dist/resources';
 // The site uses divIcon markers and its own layer controls, so Leaflet's PNG icons are unused.
 const unusedLeafletIcons={name:'unused-leaflet-icons',setup(build){
   build.onLoad({filter:/[/\\]leaflet[/\\]dist[/\\]leaflet\.css$/},async({path})=>{
@@ -15,7 +15,6 @@ const unusedLeafletIcons={name:'unused-leaflet-icons',setup(build){
     return {contents,loader:'css'};
   });
 }};
-await rm(outdir,{recursive:true,force:true});
 await build({entryPoints:[root+'src/app/app.js'],bundle:true,minify:true,format:'esm',target:['es2022'],outdir,plugins:[unusedLeafletIcons],legalComments:'eof'});
 await copyFile(root+'node_modules/leaflet/LICENSE',outdir+'/LEAFLET-LICENSE.txt');
-console.log('Built dist/app/app.js and app.css');
+console.log('Built dist/resources/app.js and app.css');
