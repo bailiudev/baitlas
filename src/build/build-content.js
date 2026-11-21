@@ -8,8 +8,8 @@ const projectsDir=path.join(root,'data/projects');
 const dist=path.join(root,'dist');
 const read=p=>readFile(p,'utf8');
 const json=p=>read(p).then(JSON.parse);
-const about=markdown(await read(path.join(root,'data/about.md')));
-const shell=await read(path.join(root,'src/app/index.html'));
+const about=markdown(await read(path.join(root,'data/pages/about.md')));
+const shell=await read(path.join(root,'src/app/page-template.html'));
 const loading='<p class="loading" role="status">Opening the atlas…</p>';
 async function writePage(relative,page,project='') {
   const depth=relative.split('/').length-1;

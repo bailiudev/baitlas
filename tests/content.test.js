@@ -79,7 +79,7 @@ test('each project has exactly one Read or Hike category',async()=>{
  }
 });
 test('About is embedded in its page from sanitized Markdown with site-relative links',async()=>{
- const source=await readFile(new URL('data/about.md',root),'utf8');
+ const source=await readFile(new URL('data/pages/about.md',root),'utf8');
  const result=await readFile(new URL('dist/about/index.html',root),'utf8');
  assert.ok(result.includes(markdown(source)));
  assert.match(result,/<h1>/);assert.match(result,/href="read\/"/);
