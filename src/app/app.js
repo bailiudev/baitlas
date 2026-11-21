@@ -4,16 +4,22 @@ import {renderProject} from './project-view.js';
 import {renderHome,renderCollection,renderAbout,inCollection,projectURL} from './pages-view.js';
 const main=document.querySelector('#main');
 const params=new URLSearchParams(location.search);
-const page=['read','hike','about'].includes(params.get('page'))?params.get('page'):'home';
-const projectId=params.get('project');
+const page=document.body.dataset.page;
+const projectId=document.body.dataset.project;
 document.querySelector('.skip-link').href=`${location.pathname}${location.search}#main`;
 for(const link of document.querySelectorAll('[data-page-link]')) {
   if(link.dataset.pageLink===page){link.classList.add('active');link.setAttribute('aria-current','page');}
 }
 try {
   if(location.protocol==='file:')throw new Error('Serve this atlas over HTTP: python3 -m http.server 8000, then open http://localhost:8000.');
-  if(page==='about') {
-    renderAbout(main,await fetchData('about.html',true));document.title='About · Baitlas';
+  const legacyPage=params.get('page');
+  if(page==='home'&&['read','hike','about'].includes(legacyPage)) {
+    const legacyProject=params.get('project');
+    const target=legacyProject&&legacyPage!=='about'?projectURL(legacyProject,legacyPage):`${legacyPage}/`;
+    const url=new URL(target,document.baseURI);url.hash=location.hash;
+    location.replace(url.href);
+  } else if(page==='about') {
+    renderAbout(main);document.title='About · Baitlas';
   } else {
     const catalog=await fetchData('projects.json');
     // Keep links shared by the first MVP working.
@@ -34,5 +40,5 @@ try {
     } else renderHome(main,catalog);
   }
 } catch(error) {
-  main.innerHTML=`<section class="error-state" role="alert"><p class="eyebrow">A SMALL DETOUR</p><h1>Let’s find our way back.</h1><p>${h(error.message)}</p><a class="underlined-link" href="?page=${page==='hike'?'hike':'read'}">Back to the collection ↗</a></section>`;
+  main.innerHTML=`<section class="error-state" role="alert"><p class="eyebrow">A SMALL DETOUR</p><h1>Let’s find our way back.</h1><p>${h(error.message)}</p><a class="underlined-link" href="${page==='hike'?'hike':'read'}/">Back to the collection ↗</a></section>`;
 }

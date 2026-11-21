@@ -12,7 +12,7 @@ npm run build
 npm run serve
 ```
 
-Open **http://127.0.0.1:8000** for the highlights homepage. Read, Hike, and About are separate views served by one `index.html`; the two collections link to project articles. Use an HTTP server; double-clicking `index.html` (`file://`) cannot load the JSON assets in browsers.
+Open **http://127.0.0.1:8000/** for the highlights homepage. Read, Hike, and About have their own directory pages (`/read/`, `/hike/`, `/about/`); each collection links to project pages such as `/read/lewis_and_clark_expedition/`. Use an HTTP server; double-clicking `index.html` (`file://`) cannot load the JSON assets in browsers.
 
 The map uses locally bundled Leaflet, Natural Earth geography, and local media. No API key, CDN, tile server, or network request is needed at runtime. Source links open the original references when clicked.
 
@@ -45,7 +45,7 @@ npm run test:browser
 package.json, package-lock.json, playwright.config.js
 src/
   build/                            Build scripts, validation, and schemas/
-  app/                              index.html, browser modules, and styles.css
+  app/                              Shared HTML template, browser modules, and styles.css
 tests/                              Content and browser tests; ignored results/
 data/
   about.md                         Site About copy
@@ -58,8 +58,10 @@ data/
     assets/images/fort-clatsop.jpg, README.md
 dist/                               Complete deployable site; built locally and ignored by Git
   index.html
+  read/index.html, hike/index.html, about/index.html
+  read/lewis_and_clark_expedition/index.html
+  hike/lewis_and_clark_expedition/index.html
   app/                             Bundled browser JavaScript, CSS, and Leaflet license
-  about.html                       Sanitized About content
   projects.json
   projects/lewis_and_clark_expedition/
     project.json                    Metadata, map config/features, timeline, cards, notes
@@ -67,11 +69,11 @@ dist/                               Complete deployable site; built locally and 
     assets/images/fort-clatsop.jpg
 ```
 
-The necessary basemap-format deviation is **GeoJSON instead of PMTiles**: the provided map sources were Natural Earth shapefiles. `build-map.js` clips and simplifies those local sources into one small regional vector file. Authored points, labels, routes, and regions use YAML; `build-content.js` converts them into the project's single `dist/projects/.../project.json`, which also contains the compiled article and timeline. The large basemap stays separate. `style.json` contains Leaflet path styles. Leaflet's default PNG marker and layer-control icons are unused; `build-app.js` omits them. No glyph fonts or sprite directories are needed because Leaflet draws these vector paths and markers directly. The build scripts keep authored data separate from deployable output. The browser app uses one `index.html` for every view. The `page` and optional `project` query parameters select the content without server rewrites. Edit the shell in `src/app/index.html` and run `npm run build` for code or style changes.
+The necessary basemap-format deviation is **GeoJSON instead of PMTiles**: the provided map sources were Natural Earth shapefiles. `build-map.js` clips and simplifies those local sources into one small regional vector file. Authored points, labels, routes, and regions use YAML; `build-content.js` converts them into the project's single `dist/projects/.../project.json`, which also contains the compiled article and timeline. The large basemap stays separate. `style.json` contains Leaflet path styles. Leaflet's default PNG marker and layer-control icons are unused; `build-app.js` omits them. No glyph fonts or sprite directories are needed because Leaflet draws these vector paths and markers directly. The build scripts keep authored data separate from deployable output. The build generates an `index.html` for each public page from the shared `src/app/index.html` template; links to older query URLs redirect to the new paths. Edit the template and run `npm run build` for code or style changes.
 
 ## Author content
 
-- `data/about.md`: all About copy. Use an introductory eyebrow paragraph, one H1, then the lead paragraph and article sections. The browser app supplies layout and typography. `build-content.js` sanitizes this into `dist/about.html`; rebuild after copy edits. About links such as `?page=read` resolve from the site root, including on repository subpaths.
+- `data/about.md`: all About copy. Use an introductory eyebrow paragraph, one H1, then the lead paragraph and article sections. The browser app supplies layout and typography. `build-content.js` sanitizes and embeds this into `dist/about/index.html`; rebuild after copy edits. Relative links resolve from the site root, including on repository subpaths.
 - `project.yaml`: title, descriptive metadata, and source list. Its `id` must match its folder name. Optional `collections: [Read, Hike]` controls which article lists include the project; otherwise `category` supplies the collection.
 - `map/config.yaml`: basemap and style paths, visible bounds, and map presentation fields such as attribution, marker pixel anchors, caption, period, disclaimer, and route/region notes.
 - `timeline.yaml`: dated events, each with a unique ID, a marker ID, summary, and source URL. Multiple events can refer to one place. Events are sorted by date during the build.
@@ -89,7 +91,7 @@ Select a timeline event or numbered place to open its card and center the map. C
 
 Read and Hike are independent article collections. The sample expedition appears in both; Hike labels it as a historical route study. About is a separate page. Each project has a full-width map, a separate horizontal timeline below it, and an article with a left-hand section menu. References appear at the bottom of the article. On small screens the section menu stacks above the text.
 
-Selected events have reloadable URLs, e.g. `?page=read&project=lewis_and_clark_expedition#event=leave-clatsop`. Section and numbered reference links preserve the current project. Links shared by the first MVP (`#lewis_and_clark_expedition/leave-clatsop`) redirect to the new article URL.
+Selected events have reloadable URLs, e.g. `/read/lewis_and_clark_expedition/#event=leave-clatsop`. Section and numbered reference links preserve the current project. Older query and hash links redirect to the new article URL. On GitHub Pages, directory routes use a trailing slash; a request without it may be redirected to the slash form.
 
 ## Historical scope and provenance
 
@@ -99,7 +101,7 @@ The supplied Natural Earth datasets are public domain and represent **generalize
 
 ## GitHub Pages
 
-The workflow installs dependencies, builds `dist/`, runs content and desktop/mobile browser tests against `dist/` alone, then uploads that directory to GitHub Pages. Source files, original shapefiles, and `node_modules` are excluded from the deployed artifact. Paths are relative, so the site supports repository subpaths on GitHub Pages. Deployment occurs on a push to `main` or manual workflow dispatch.
+The workflow installs dependencies, builds `dist/`, runs content and desktop/mobile browser tests against `dist/` alone, then uploads that directory to GitHub Pages. Source files, original shapefiles, and `node_modules` are excluded from the deployed artifact. With the linked custom domain, public routes include `https://baitlas.com/`, `https://baitlas.com/read/`, `https://baitlas.com/about/`, and `https://baitlas.com/read/lewis_and_clark_expedition/`. Relative base paths also support the repository subpath on GitHub Pages. Deployment occurs on a push to `main` or manual workflow dispatch.
 
 ## Map behavior
 

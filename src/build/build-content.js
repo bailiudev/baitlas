@@ -9,6 +9,17 @@ const dist=path.join(root,'dist');
 const read=p=>readFile(p,'utf8');
 const json=p=>read(p).then(JSON.parse);
 const about=markdown(await read(path.join(root,'data/about.md')));
+const shell=await read(path.join(root,'src/app/index.html'));
+const loading='<p class="loading" role="status">Opening the atlas…</p>';
+async function writePage(relative,page,project='') {
+  const depth=relative.split('/').length-1;
+  const base='../'.repeat(depth)||'./';
+  let html=shell.replace('__BASE__',base).replace('__PAGE__',page).replace('__PROJECT__',project);
+  if(page==='about') html=html.replace(loading,`<section class="about-page">${about}</section>`);
+  const destination=path.join(dist,relative);
+  await mkdir(path.dirname(destination),{recursive:true});
+  await writeFile(destination,html);
+}
 const output=[];
 for(const entry of (await readdir(projectsDir,{withFileTypes:true})).sort((a,b)=>a.name.localeCompare(b.name))) {
   if(!entry.isDirectory()) continue;
@@ -44,10 +55,13 @@ for(const entry of (await readdir(projectsDir,{withFileTypes:true})).sort((a,b)=
 // Validate every project before replacing output. A full build removes stale files;
 // a content-only build preserves the existing browser bundle.
 if(process.env.BAITLAS_FULL_BUILD==='1') await rm(dist,{recursive:true,force:true});
-else await rm(path.join(dist,'projects'),{recursive:true,force:true});
+else {
+  await Promise.all(['projects','read','hike','about'].map(name=>rm(path.join(dist,name),{recursive:true,force:true})));
+  await rm(path.join(dist,'about.html'),{force:true});
+}
 await mkdir(dist,{recursive:true});
-await copyFile(path.join(root,'src/app/index.html'),path.join(dist,'index.html'));
-await writeFile(path.join(dist,'about.html'),about);
+await writePage('index.html','home');
+await Promise.all(['read','hike','about'].map(page=>writePage(`${page}/index.html`,page)));
 for(const item of output) {
   const dest=path.join(dist,'projects',item.id);await mkdir(dest,{recursive:true});
   const payload={project:item.project,map:item.map,features:item.features,timeline:item.timeline,cards:item.cards,notes:item.notes};
@@ -56,6 +70,10 @@ for(const item of output) {
     const target=path.join(dest,relative);
     await mkdir(path.dirname(target),{recursive:true});
     await copyFile(path.join(item.dir,relative),target);
+  }
+  for(const collection of (item.project.collections||[item.project.category])) {
+    const page=collection.toLowerCase();
+    await writePage(`${page}/${item.id}/index.html`,page,item.id);
   }
   console.log(`Built ${item.id}: ${item.timeline.length} events, ${item.features.features.length} features, ${Object.keys(item.cards).length} cards`);
 }

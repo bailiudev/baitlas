@@ -1,5 +1,5 @@
 import {test,expect} from '@playwright/test';
-const project='/?page=read&project=lewis_and_clark_expedition';
+const project='/read/lewis_and_clark_expedition/';
 
 test('homepage, independent collections, and About have working navigation',async({page})=>{
  await page.goto('/');
@@ -8,19 +8,28 @@ test('homepage, independent collections, and About have working navigation',asyn
  await expect(page.locator('#map')).toHaveCount(0);
  for(const collection of ['Read','Hike']) {
   await page.getByRole('link',{name:collection,exact:true}).click();
-  await expect(page).toHaveURL(`/?page=${collection.toLowerCase()}`);
+  await expect(page).toHaveURL(`/${collection.toLowerCase()}/`);
   await expect(page.locator('.article-row')).toHaveCount(1);
   await page.locator('.article-row').click();
   await expect(page.locator('.project-heading h1')).toHaveText('Lewis & Clark Expedition');
   if(collection==='Hike')await expect(page.locator('.mode-notice')).toBeVisible();
  }
  await page.getByRole('link',{name:'About',exact:true}).click();
- await expect(page).toHaveURL('/?page=about');
+ await expect(page).toHaveURL('/about/');
  await expect(page.locator('h1')).toContainText('Every story');
  await expect(page.locator('#map')).toHaveCount(0);
  await page.getByRole('link',{name:'Baitlas home',exact:true}).click();
  await expect(page).toHaveURL('/');
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+});
+
+test('slashless direct URLs reach their directory pages',async({page})=>{
+ for(const [route,selector] of [['/read','.article-row'],['/about','.about-page h1'],['/read/lewis_and_clark_expedition','.project-heading h1']]) {
+  const response=await page.goto(route);
+  expect(response.status()).toBe(200);
+  await expect(page).toHaveURL(`${route}/`);
+  await expect(page.locator(selector)).toBeVisible();
+ }
 });
 
 test('independent timeline below map synchronizes cards and layers',async({page})=>{
@@ -74,16 +83,16 @@ test('article section navigation and references stay inside the current project'
  await expect.poll(()=>page.locator('.notes-copy img').evaluate(img=>img.complete&&img.naturalWidth>0)).toBe(true);
 });
 
-test('new and legacy event links and missing-project recovery work',async({page})=>{
- for(const url of [`${project}#event=leave-clatsop`,'/#lewis_and_clark_expedition/leave-clatsop']) {
+test('direct and legacy event links work; unknown project routes return 404',async({page})=>{
+ for(const url of [`${project}#event=leave-clatsop`,'/?page=read&project=lewis_and_clark_expedition#event=leave-clatsop','/#lewis_and_clark_expedition/leave-clatsop']) {
   await page.goto(url);
   await expect(page.locator('.card-event-title')).toHaveText('The return begins');
   await expect(page.locator('#place-card h1')).toHaveText('Fort Clatsop');
   await expect(page).toHaveURL(`${project}#event=leave-clatsop`);
  }
- await page.goto('/?page=read&project=missing-project');
- await expect(page.getByRole('alert')).toContainText('This article could not be found');
- await page.getByRole('link',{name:'Back to the collection'}).click();
+ const missing=await page.goto('/read/missing-project/');
+ expect(missing.status()).toBe(404);
+ await page.goto('/read/');
  await expect(page.locator('.article-row')).toHaveCount(1);
 });
 
