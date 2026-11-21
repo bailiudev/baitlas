@@ -71,10 +71,8 @@ for(const item of output) {
     await mkdir(path.dirname(target),{recursive:true});
     await copyFile(path.join(item.dir,relative),target);
   }
-  for(const collection of (item.project.collections||[item.project.category])) {
-    const page=collection.toLowerCase();
-    await writePage(`${page}/${item.id}/index.html`,page,item.id);
-  }
+  const page=item.project.category.toLowerCase();
+  await writePage(`${page}/${item.id}/index.html`,page,item.id);
   console.log(`Built ${item.id}: ${item.timeline.length} events, ${item.features.features.length} features, ${Object.keys(item.cards).length} cards`);
 }
-await writeFile(path.join(dist,'projects.json'),JSON.stringify(output.map(({project:p})=>({id:p.id,title:p.title,description:p.description,period:p.period,category:p.category,collections:p.collections||[p.category]})),null,2)+'\n');
+await writeFile(path.join(dist,'projects.json'),JSON.stringify(output.map(({project:p})=>({id:p.id,title:p.title,description:p.description,period:p.period,category:p.category})),null,2)+'\n');

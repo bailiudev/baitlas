@@ -60,7 +60,6 @@ dist/                               Complete deployable site; built locally and 
   index.html
   read/index.html, hike/index.html, about/index.html
   read/lewis_and_clark_expedition/index.html
-  hike/lewis_and_clark_expedition/index.html
   app/                             Bundled browser JavaScript, CSS, and Leaflet license
   projects.json
   projects/lewis_and_clark_expedition/
@@ -74,7 +73,7 @@ The necessary basemap-format deviation is **GeoJSON instead of PMTiles**: the pr
 ## Author content
 
 - `data/about.md`: all About copy. Use an introductory eyebrow paragraph, one H1, then the lead paragraph and article sections. The browser app supplies layout and typography. `build-content.js` sanitizes and embeds this into `dist/about/index.html`; rebuild after copy edits. Relative links resolve from the site root, including on repository subpaths.
-- `project.yaml`: title, descriptive metadata, and source list. Its `id` must match its folder name. Optional `collections: [Read, Hike]` controls which article lists include the project; otherwise `category` supplies the collection.
+- `project.yaml`: title, descriptive metadata, source list, and one required `category: Read` or `category: Hike`. Its `id` must match its folder name. The category determines the project's only collection and URL.
 - `map/config.yaml`: basemap and style paths, visible bounds, and map presentation fields such as attribution, marker pixel anchors, caption, period, disclaimer, and route/region notes.
 - `timeline.yaml`: dated events, each with a unique ID, a marker ID, summary, and source URL. Multiple events can refer to one place. Events are sorted by date during the build.
 - `map/points.yaml`: `markers` with unique IDs, WGS84 `[longitude, latitude]` coordinates, and Markdown card names. These are the selectable locations for timeline events and information cards.
@@ -89,7 +88,7 @@ The content build checks schemas, coordinates, real calendar dates, duplicate ID
 
 Select a timeline event or numbered place to open its card and center the map. Cards start hidden. Use previous/next to move through events, **Full expedition** to restore the overview, and checkboxes to toggle routes, places, or regions. Maps support dragging, touch zoom, zoom buttons, and keyboard panning. Mouse-wheel zoom is disabled to preserve normal page scrolling.
 
-Read and Hike are independent article collections. The sample expedition appears in both; Hike labels it as a historical route study. About is a separate page. Each project has a full-width map, a separate horizontal timeline below it, and an article with a left-hand section menu. References appear at the bottom of the article. On small screens the section menu stacks above the text.
+Read and Hike are independent article collections. The sample expedition belongs to Read; Hike is empty until a Hike project is added. About is a separate page. Each project has a full-width map, a separate horizontal timeline below it, and an article with a left-hand section menu. References appear at the bottom of the article. On small screens the section menu stacks above the text.
 
 Selected events have reloadable URLs, e.g. `/read/lewis_and_clark_expedition/#event=leave-clatsop`. Section and numbered reference links preserve the current project. Older query and hash links redirect to the new article URL. On GitHub Pages, directory routes use a trailing slash; a request without it may be redirected to the slash form.
 

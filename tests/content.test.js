@@ -70,6 +70,14 @@ test('map configuration is authored and generated separately from project metada
  assert.equal(compiled.project.map,undefined);
  assert.equal(compiled.map.caption,map.caption);
 });
+test('each project has exactly one Read or Hike category',async()=>{
+ const [project,map,timeline,features,cards]=await fixture();
+ assert.equal(project.category,'Read');
+ assert.equal(project.collections,undefined);
+ for(const invalid of [{...project,collections:['Read','Hike']},{...project,category:'Travel'},{...project,category:undefined}]) {
+  assert.throws(()=>validateContent(invalid,map,timeline,features,cards),/project.yaml/);
+ }
+});
 test('About is embedded in its page from sanitized Markdown with site-relative links',async()=>{
  const source=await readFile(new URL('data/about.md',root),'utf8');
  const result=await readFile(new URL('dist/about/index.html',root),'utf8');
@@ -89,12 +97,13 @@ test('dist contains every runtime asset without source-directory paths',async()=
  await readFile(new URL('dist/app/app.js',root));
  await readFile(new URL('dist/app/app.css',root));
  const catalog=await json('dist/projects.json');
- for(const {id,collections} of catalog){
-  for(const collection of collections.map(value=>value.toLowerCase())) {
-   const pageHtml=await readFile(new URL(`dist/${collection}/${id}/index.html`,root),'utf8');
-   assert.ok(pageHtml.includes('<base href="../../"'));
-   assert.ok(pageHtml.includes(`data-page="${collection}" data-project="${id}"`));
-  }
+ for(const {id,category,...metadata} of catalog){
+  assert.equal(metadata.collections,undefined);
+  const collection=category.toLowerCase();
+  const pageHtml=await readFile(new URL(`dist/${collection}/${id}/index.html`,root),'utf8');
+  assert.ok(pageHtml.includes('<base href="../../"'));
+  assert.ok(pageHtml.includes(`data-page="${collection}" data-project="${id}"`));
+  await assert.rejects(readFile(new URL(`dist/${collection==='read'?'hike':'read'}/${id}/index.html`,root),'utf8'),/ENOENT/);
   const base=`dist/projects/${id}/`;
   assert.deepEqual((await readdir(new URL(base,root))).sort(),['assets','project.json']);
   const {map,cards,notes,features,timeline}=await json(base+'project.json');
