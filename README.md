@@ -46,9 +46,8 @@ data/
   pages/about.md                    Site About copy
   shared/maps/                      Original supplied Natural Earth datasets
   projects/lewis_and_clark_expedition/
-    project.yaml, timeline.yaml, notes.md, cards.yaml
+    project.yaml, sources.yaml, timeline.yaml, notes.md, cards.yaml
     maps/config.yaml, points.yaml, labels.yaml, routes.yaml, regions.yaml
-    maps/README.md                  Map provenance; custom GeoJSON can live here
     images/fort-clatsop.jpg
 dist/                               Complete deployable site; built locally and ignored by Git
   index.html
@@ -57,7 +56,7 @@ dist/                               Complete deployable site; built locally and 
   app/                             Bundled browser JavaScript, CSS, and Leaflet license
   projects.json
   projects/lewis_and_clark_expedition/
-    project.json                    Metadata, map config/features, timeline, cards, notes
+    project.json                    Metadata, sources, map config/features, timeline, cards, notes
     maps/basemap.geojson            Generated at build time
     images/fort-clatsop.jpg
 ```
@@ -67,8 +66,9 @@ The necessary basemap-format deviation is **GeoJSON instead of PMTiles**: the pr
 ## Author content
 
 - `data/pages/about.md`: all About copy. Use an introductory eyebrow paragraph, one H1, then the lead paragraph and article sections. The browser app supplies layout and typography. `build-content.js` sanitizes and embeds this into `dist/about/index.html`; rebuild after copy edits. Relative links resolve from the site root, including on repository subpaths.
-- `project.yaml`: title, descriptive metadata, source list, and one required `category: Read` or `category: Hike`. Its `id` must match its folder name. The category determines the project's only collection and URL.
-- `maps/config.yaml`: `basemap: natural-earth` generates a basemap from `data/shared/maps/`, while `basemap: maps/custom.geojson` selects a project-supplied map. It also holds Leaflet styles, visible bounds, and presentation fields such as attribution, marker pixel anchors, caption, period, disclaimer, and route/region notes. Custom GeoJSON features use `properties.kind` values `land`, `lakes`, or `rivers`.
+- `project.yaml`: title, descriptive metadata, and one required `category: Read` or `category: Hike`. Its `id` must match its folder name. The category determines the project's only collection and URL.
+- `sources.yaml`: a `sources:` list of title and HTTPS URL pairs used for the article's references.
+- `maps/config.yaml`: `basemap: natural-earth` generates a basemap from `data/shared/maps/`, while `basemap: maps/custom.geojson` selects a project-supplied map. Its `source:` entry records the basemap's origin, datasets, license, and geographic caveat. It also holds Leaflet styles, visible bounds, and presentation fields such as attribution, marker pixel anchors, caption, period, disclaimer, and route/region notes. Custom GeoJSON features use `properties.kind` values `land`, `lakes`, or `rivers`.
 - `timeline.yaml`: dated events, each with a unique ID, a marker ID, summary, and source URL. Multiple events can refer to one place. Events are sorted by date during the build.
 - `maps/points.yaml`: `markers` with unique IDs and WGS84 `[longitude, latitude]` coordinates. These are the selectable locations for timeline events and information cards. Each marker ID must have a matching entry in `cards.yaml`.
 - `maps/labels.yaml`: `labels` with text, coordinates, and an ocean/mountain/river style.
@@ -89,7 +89,7 @@ Selected events have reloadable URLs, e.g. `/read/lewis_and_clark_expedition/#ev
 
 ## Historical scope and provenance
 
-Historical text is summarized from the National Park Service and National Archives, with links in cards, timeline data, and notes. The local photograph depicts a **modern Fort Clatsop reconstruction** and is credited to NPS in the notes. Map provenance is recorded in `maps/README.md` and beside the shared shapefiles.
+Historical text is summarized from the National Park Service and National Archives, with links in `sources.yaml`, cards, timeline data, and notes. The local photograph depicts a **modern Fort Clatsop reconstruction** and is credited to NPS in the notes. Map provenance is recorded in `maps/config.yaml` and beside the shared shapefiles.
 
 The supplied Natural Earth datasets are public domain and represent **generalized modern geography**, not the landscape in 1804. Coordinates are editorial approximations. Route segments are simplified outbound connections, not reconstructed daily tracks; the split 1806 return routes are intentionally omitted, while the return remains on the timeline. Regions are editorial focus areas, not Indigenous territories or historical political boundaries. Fort Mandan's original location is uncertain.
 

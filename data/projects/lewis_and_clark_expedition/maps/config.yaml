@@ -1,4 +1,11 @@
 basemap: natural-earth
+source:
+  title: Natural Earth 1:10 million
+  url: https://www.naturalearthdata.com/
+  license: public domain
+  datasets: [ne_10m_land, ne_10m_lakes, ne_10m_rivers_lake_centerlines]
+  location: data/shared/maps/
+  note: Generalized modern geography, not a reconstruction of the 1804–1806 landscape.
 style:
   ocean: "#dce8e6"
   land:

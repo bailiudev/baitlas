@@ -3,10 +3,11 @@ import {readFileSync} from 'node:fs';
 const ajv = new Ajv({allErrors:true});
 const schema = name => JSON.parse(readFileSync(new URL(`./schemas/${name}.schema.json`, import.meta.url)));
 const projectSchema = ajv.compile(schema('project'));
+const sourcesSchema = ajv.compile(schema('sources'));
 const mapSchema = ajv.compile(schema('map'));
 const timelineSchema = ajv.compile(schema('timeline'));
-export function validateSchema(project, map, timeline) {
-  for (const [name, check, value] of [['project.yaml',projectSchema,project],['maps/config.yaml',mapSchema,map],['timeline.yaml',timelineSchema,timeline]]) {
+export function validateSchema(project, map, timeline, sources) {
+  for (const [name, check, value] of [['project.yaml',projectSchema,project],['sources.yaml',sourcesSchema,sources],['maps/config.yaml',mapSchema,map],['timeline.yaml',timelineSchema,timeline]]) {
     if (!check(value)) throw new Error(`${name}: ${ajv.errorsText(check.errors)}`);
   }
   for (const key of ['bounds','extent']) {
@@ -18,8 +19,8 @@ export function validateSchema(project, map, timeline) {
 export function coordinate(c) {
   if (!Array.isArray(c) || c.length!==2 || !c.every(Number.isFinite) || Math.abs(c[0])>180 || Math.abs(c[1])>90) throw new Error(`Invalid coordinate: ${JSON.stringify(c)}`);
 }
-export function validateContent(project, map, timeline, features, cards) {
-  validateSchema(project,map,timeline);
+export function validateContent(project, map, timeline, features, cards, sources) {
+  validateSchema(project,map,timeline,sources);
   const ids=new Set();
   for (const f of features) {
     if(f.type!=='Feature' || !f.properties || !/^[a-z0-9_-]+$/.test(f.properties.id)) throw new Error('Invalid feature identity');

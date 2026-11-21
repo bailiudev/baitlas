@@ -11,9 +11,10 @@ const json=async p=>JSON.parse(await readFile(new URL(p,root),'utf8'));
 async function fixture(){
  const base='dist/projects/lewis_and_clark_expedition/';
  const project=yaml(await readFile(new URL('data/projects/lewis_and_clark_expedition/project.yaml',root),'utf8'));
+ const sources=yaml(await readFile(new URL('data/projects/lewis_and_clark_expedition/sources.yaml',root),'utf8'));
  const map=yaml(await readFile(new URL('data/projects/lewis_and_clark_expedition/maps/config.yaml',root),'utf8'));
  const compiled=await json(base+'project.json');
- return [project,map,{events:compiled.timeline},compiled.features.features,compiled.cards];
+ return [project,map,{events:compiled.timeline},compiled.features.features,compiled.cards,sources];
 }
 test('compiled sample has valid coordinates, card references, and chronological events',async()=>{
  const args=await fixture();validateContent(...args);
@@ -91,19 +92,32 @@ test('map annotations validate coordinates, kinds, and marker references',async(
  const d=await fixture();d[3]=d[3].filter(f=>f.properties.kind!=='label');delete d[1].markerAnchors;delete d[1].attribution;
  assert.doesNotThrow(()=>validateContent(...d));
 });
-test('map configuration is authored and generated separately from project metadata',async()=>{
- const [project,map]=await fixture();
+test('map configuration and sources are authored separately from project metadata',async()=>{
+ const [project,map,,,,sources]=await fixture();
  const compiled=await json('dist/projects/lewis_and_clark_expedition/project.json');
- assert.deepEqual(Object.keys(compiled).sort(),['cards','features','map','notes','project','timeline']);
+ assert.deepEqual(Object.keys(compiled).sort(),['cards','features','map','notes','project','sources','timeline']);
  assert.equal(project.map,undefined);
+ assert.equal(project.sources,undefined);
  assert.equal(map.caption,'THE WESTWARD PASSAGE');
  assert.equal(map.basemap,'natural-earth');
+ assert.equal(map.source.title,'Natural Earth 1:10 million');
+ assert.deepEqual(map.source.datasets,['ne_10m_land','ne_10m_lakes','ne_10m_rivers_lake_centerlines']);
  assert.equal(map.style.ocean,'#dce8e6');
  assert.deepEqual(compiled.project,project);
  assert.equal(compiled.project.map,undefined);
+ assert.equal(compiled.project.sources,undefined);
+ assert.deepEqual(compiled.sources,sources.sources);
  assert.equal(compiled.map.caption,map.caption);
  assert.equal(compiled.map.basemap,'projects/lewis_and_clark_expedition/maps/basemap.geojson');
  assert.deepEqual(compiled.map.style,map.style);
+});
+test('rejects malformed project sources and map provenance',async()=>{
+ const a=await fixture();a[5].sources[0].url='http://example.com';
+ assert.throws(()=>validateContent(...a),/sources.yaml/);
+ const b=await fixture();b[5].sources=[];
+ assert.throws(()=>validateContent(...b),/sources.yaml/);
+ const c=await fixture();c[1].source.url='http://example.com';
+ assert.throws(()=>validateContent(...c),/maps\/config.yaml/);
 });
 test('each project has exactly one Read or Hike category',async()=>{
  const [project,map,timeline,features,cards]=await fixture();
